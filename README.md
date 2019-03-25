@@ -19,3 +19,4 @@ The hybrid dataset includes HybriSupply and Use tables (HSUTs) and Hybrid Input-
 
 ## Differences between the two tables
 
+[https://github.com/BONSAMURAIS/EXIOBASE-conversion-software/blob/master/differences_exiobase_monetary_physical.jpg]
