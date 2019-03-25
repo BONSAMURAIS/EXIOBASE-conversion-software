@@ -19,5 +19,14 @@ The hybrid dataset includes HybriSupply and Use tables (HSUTs) and Hybrid Input-
 
 ## Differences between the two tables
 
+The differencies between the types of tables are listed in the table below.
+
 ![Table](https://github.com/BONSAMURAIS/EXIOBASE-conversion-software/blob/master/differences_exiobase_monetary_physical.jpg)
+
+## Selected framework for Bonsai
+
+The hybrid supply and use tables are the natural choice for Bonsai for the following reasons:
+
+- currently there are no monetary supply and use tables avalaible. The available MIOTs are the result of the adoption of specific constructs. The aim of Bonsai is to leave to the user the choice of the construct to transform supply and use tables into input-output tables.
+- hybrid tables can be easily linked to other existing LCA-datasets becuase the tangible flows are accounted either in tonne or TJ. Therefore there is no need to use prices that may be a further source of uncertainty.
 
