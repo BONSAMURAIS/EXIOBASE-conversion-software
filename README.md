@@ -26,6 +26,8 @@ The differencies between the types of tables are listed in the table below.
 
 ![Table](https://github.com/BONSAMURAIS/EXIOBASE-conversion-software/blob/master/differences_exiobase_monetary_physical.jpg)
 
+The lack of value added in the hybrid table is a temporary issue
+
 ## Selected framework for Bonsai
 
 The hybrid supply and use tables are the natural choice for Bonsai for the following reasons:
