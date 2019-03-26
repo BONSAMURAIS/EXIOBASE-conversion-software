@@ -1,5 +1,8 @@
-# EXIOBASE-conversion-software
-This repo explains the reasons behind the choice of the EXIOBASE version adopted in the initial version of Bonsai and how to convert the dataset into RDF.
+# About this repository
+The code in this repository is for conversion of these tables into into the Bonsai RDF ontology.
+
+This readme explains the reasoning behind the choice to use the hybrid (rather than monetary) tables of EXIOBASE for the hackathon prototype. 
+
 
 # Versions of Exiobase currently available
 On [exiobase.eu](https://www.exiobase.eu/index.php/component/users/?view=login&return=aHR0cHM6Ly93d3cuZXhpb2Jhc2UuZXUvaW5kZXgucGhwL2RhdGEtZG93bmxvYWQvZXhpb2Jhc2UzaHliLzEyNS1leGlvYmFzZS0zLTMtMTctaHN1dC0yMDExL2ZpbGU=&Itemid=251) there are monetary and hybid tables. 
