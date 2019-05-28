@@ -1,11 +1,34 @@
 # About this repository
 The code in this repository is for conversion of these tables into into the Bonsai RDF ontology.
 
-This readme explains the reasoning behind the choice to use the hybrid (rather than monetary) tables of EXIOBASE for the hackathon prototype. 
+This readme explains the reasoning behind the choice to use the hybrid (rather than monetary) tables of EXIOBASE for the hackathon prototype.
+
+## Run it
+
+### Setup
+
+```bash
+pipenv install
+pipenv shell
+```
+
+### Convert `xslb` to `csv`
+```
+python scripts/excel2csv.py -i data/MR_HSUP_2011_v3_3_17.xlsb -o data/
+
+python scripts/excel2csv.py -i data/MR_HUSE_2011_v3_3_17.xlsb -o data/
+```
+
+### Convert `csv` to `ttl`
+```
+python scripts/csv2rdf.py -i data/MR_HSUP_2011_v3_3_17.csv -o data/  -c HSUP --type output
+```
 
 
-# Versions of Exiobase currently available
-On [exiobase.eu](https://www.exiobase.eu/index.php/component/users/?view=login&return=aHR0cHM6Ly93d3cuZXhpb2Jhc2UuZXUvaW5kZXgucGhwL2RhdGEtZG93bmxvYWQvZXhpb2Jhc2UzaHliLzEyNS1leGlvYmFzZS0zLTMtMTctaHN1dC0yMDExL2ZpbGU=&Itemid=251) there are monetary and hybid tables. 
+
+
+## Versions of Exiobase currently available
+On [exiobase.eu](https://www.exiobase.eu/index.php/component/users/?view=login&return=aHR0cHM6Ly93d3cuZXhpb2Jhc2UuZXUvaW5kZXgucGhwL2RhdGEtZG93bmxvYWQvZXhpb2Jhc2UzaHliLzEyNS1leGlvYmFzZS0zLTMtMTctaHN1dC0yMDExL2ZpbGU=&Itemid=251) there are monetary and hybid tables.
 
 ### Monetary tables v3.4
 
