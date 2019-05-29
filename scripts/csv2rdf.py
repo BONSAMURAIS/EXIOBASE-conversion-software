@@ -90,7 +90,7 @@ def makeRDF(data, code="HSUP", isInput=True):
     ## Set metadata about this file
     # Author, CC licence, version
 
-    DATASET = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/")
+    DATASET = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}".format(code.lower()))
     g.add( ( DATASET, RDF.type, DTYPE.Dataset ) )
     g.add( ( DATASET, NS1.license, URIRef("http://creativecommons.org/licenses/by/3.0/") ) )
     g.add( ( DATASET, DC.contributor, Literal("BONSAI team") ) )
@@ -99,9 +99,9 @@ def makeRDF(data, code="HSUP", isInput=True):
     g.add( ( DATASET, DC.modified, Literal(datetime.date.today().strftime("%Y-%m-%d"),datatype=XSD.date) ) )
     g.add( ( DATASET, DC.publisher, Literal("bonsai.uno") ) )
     g.add( ( DATASET, DC.title, Literal("EXIOBASE {} data v. 3.3.17".format(code)) ) )
-    g.add( ( DATASET, NS0.preferredNamespaceUri, URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/#") ) )
+    g.add( ( DATASET, NS0.preferredNamespaceUri, URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/#".format(code.lower())) ) )
     g.add( ( DATASET, OWL.versionInfo, Literal("0.3") ) )
-    g.add( ( DATASET, FOAF.homepage, URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/documentation.html") ) )
+    g.add( ( DATASET, FOAF.homepage, URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/documentation.html".format(code.lower())) ) )
 
     # TODO: instantiate 2011 EXTENT URI as Temporal Extent to be assigned to the dataset
 
@@ -128,7 +128,7 @@ def makeRDF(data, code="HSUP", isInput=True):
                                                                     len(fobj_alphacodes),
                                                                     len(act_alphacodes)
                                                                     ))
-
+    code = code.lower()
     country_map = {}
     for c in all_countries:
         c_node = URIRef("http://rdf.bonsai.uno/location/exiobase3_3_17/#"+c)
@@ -154,7 +154,7 @@ def makeRDF(data, code="HSUP", isInput=True):
         # TODO: Here for each row we need to instantiate:
 
         # FLOW_URI = generate Flow URI For this row
-        flowNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/#f_{}".format(index))
+        flowNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/#f_{}".format(code,index))
         # insert flow_uri is A Flow
         g.add((flowNode, RDF.type, BONT.Flow ))
 
@@ -165,7 +165,7 @@ def makeRDF(data, code="HSUP", isInput=True):
         if ac_key in activity_instances_map:
             acNode = activity_instances_map[ac_key]
         else :
-            acNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/#a_{}".format(len(activity_instances_map)))
+            acNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/#a_{}".format(code, len(activity_instances_map)))
             activity_instances_map[ac_key] = acNode
 
             # insert ACTIVITY_URI is a activty
