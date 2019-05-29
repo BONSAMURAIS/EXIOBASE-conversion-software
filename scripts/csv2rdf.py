@@ -267,6 +267,7 @@ if __name__ == "__main__":
 
     rdfOut = outdir + filename + '.' + args.flowtype
 
-    print("Done making RDF graph")
+    print("Done making RDF graph. Final Size {} triples".format(len(rdfGraph)))
     # Output format default is NT so that i can be splitted
     rdfGraph.serialize(destination=rdfOut, format=args.flowtype)
+    print("Saved to {}".format(rdfOut))
