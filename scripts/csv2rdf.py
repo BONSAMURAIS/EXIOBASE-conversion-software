@@ -265,7 +265,7 @@ if __name__ == "__main__":
     if not outdir.endswith('/'):
         outdir = outdir + '/'
 
-    rdfOut = outdir + filename + '.ttl'
+    rdfOut = outdir + filename + '.' + args.flowtype
 
     print("Done making RDF graph")
     # Output format default is NT so that i can be splitted
