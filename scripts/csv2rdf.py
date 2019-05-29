@@ -154,7 +154,7 @@ def makeRDF(data, code="HSUP", isInput=True):
         # TODO: Here for each row we need to instantiate:
 
         # FLOW_URI = generate Flow URI For this row
-        flowNode = BNode()
+        flowNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/#f_{}".format(index))
         # insert flow_uri is A Flow
         g.add((flowNode, RDF.type, BONT.Flow ))
 
@@ -165,7 +165,7 @@ def makeRDF(data, code="HSUP", isInput=True):
         if ac_key in activity_instances_map:
             acNode = activity_instances_map[ac_key]
         else :
-            acNode = BNode()
+            acNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/#a_{}".format(len(activity_instances_map)))
             activity_instances_map[ac_key] = acNode
 
             # insert ACTIVITY_URI is a activty
@@ -241,9 +241,15 @@ if __name__ == "__main__":
                         dest='code',
                         help='The code of the specific file: HSUP/HUSE/HFD/Other?')
 
-    parser.add_argument('--type',
+    parser.add_argument('--flowtype',
                       choices=['input','output'],
                       help='If the flow are input or output of activites')
+
+    parser.add_argument('--format',
+                      choices=['nt','ttl', 'xml'],
+                      default='nt',
+                      help='If the flow are input or output of activites')
+
 
     args = parser.parse_args()
 
@@ -252,7 +258,7 @@ if __name__ == "__main__":
     pandasDF=pd.read_csv(csvfile, header=None)
 
     # This will create the graph in memory!
-    rdfGraph = makeRDF(pandasDF, args.code, isInput=(args.type == 'input'))
+    rdfGraph = makeRDF(pandasDF, args.code, isInput=(args.flowtype == 'input'))
     filename = re.sub(r'.csv$', '', file_name(csvfile))
 
     outdir = args.outdir
@@ -262,4 +268,5 @@ if __name__ == "__main__":
     rdfOut = outdir + filename + '.ttl'
 
     print("Done making RDF graph")
-    rdfGraph.serialize(destination=rdfOut, format='ttl')
+    # Output format default is NT so that i can be splitted
+    rdfGraph.serialize(destination=rdfOut, format=args.flowtype)
