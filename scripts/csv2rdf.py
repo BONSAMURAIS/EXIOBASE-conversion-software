@@ -149,7 +149,7 @@ def makeRDF(data, code="HSUP", isInput=True):
 
     ## Here is the instantiation of the actual data, the FLOWs
     for index, row in data.iterrows():
-        if index%50 == 1:
+        if index%1000 == 1:
             print("Parsed {} flows / {} activities".format(index, len(activity_instances_map)))
         # TODO: Here for each row we need to instantiate:
 
@@ -248,7 +248,7 @@ if __name__ == "__main__":
     parser.add_argument('--format',
                       choices=['nt','ttl', 'xml'],
                       default='nt',
-                      help='If the flow are input or output of activites')
+                      help='The output format')
 
 
     args = parser.parse_args()
@@ -269,5 +269,5 @@ if __name__ == "__main__":
 
     print("Done making RDF graph. Final Size {} triples".format(len(rdfGraph)))
     # Output format default is NT so that i can be splitted
-    rdfGraph.serialize(destination=rdfOut, format=args.flowtype)
+    rdfGraph.serialize(destination=rdfOut, format=args.format)
     print("Saved to {}".format(rdfOut))
