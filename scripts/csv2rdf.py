@@ -265,7 +265,7 @@ if __name__ == "__main__":
     if not outdir.endswith('/'):
         outdir = outdir + '/'
 
-    rdfOut = outdir + filename + '.' + args.flowtype
+    rdfOut = outdir + filename + '.' + args.format
 
     print("Done making RDF graph. Final Size {} triples".format(len(rdfGraph)))
     # Output format default is NT so that i can be splitted
