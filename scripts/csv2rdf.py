@@ -169,7 +169,7 @@ def makeRDF(data, code="HSUP", isInput=True):
             activity_instances_map[ac_key] = acNode
 
             # insert ACTIVITY_URI is a activty
-            g.add((acNode, RDF.type, BONT.activity ))
+            g.add((acNode, RDF.type, BONT.Activity ))
 
             # TODO: check that activity type exists in the vocabulary
             # ACTIVITY_TYPE_URI = get Act Type URI from row[2]/row[3]

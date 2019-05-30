@@ -21,7 +21,8 @@ python scripts/excel2csv.py -i data/MR_HUSE_2011_v3_3_17.xlsb -o data/
 
 ### Convert `csv` to `ttl`
 ```
-python scripts/csv2rdf.py -i data/MR_HSUP_2011_v3_3_17.csv -o data/  -c HSUP --type output
+python scripts/csv2rdf.py -i data/MR_HSUP_2011_v3_3_17.csv -o data/  -c HSUP --flowtype output
+python scripts/csv2rdf.py -i data/MR_HUSE_2011_v3_3_17.csv -o data/  -c HUSE --flowtype input
 ```
 
 
