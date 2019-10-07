@@ -154,8 +154,9 @@ dmypy.json
 .pyre/
 
 
-data/*.xlsb
-data/*.csv
-data/*.rdf
-data/*.ttl
+data*/*.xlsb
+data*/*.csv
+data*/*.rdf
+data*/*.ttl
+data*/*.nt
 .vscode/**

@@ -51,6 +51,8 @@ def makeRDF(data, code="HSUP", isInput=True):
     # Data row:
     0   1                           2       3        4    5            6       7        8        9             10
     AU  Cultivation of paddy rice   i01.a   A_PARI   AU   Paddy rice   p01.a   C_PARI   tonnes   6.147905e+05  True
+
+    # cols 2/3 are redundant, 6/7 are also redundant -> we use only 3 and 7
     '''
 
     # Initialize graph and namespaces
@@ -118,10 +120,10 @@ def makeRDF(data, code="HSUP", isInput=True):
     fobj_countries = data.iloc[:,4].unique()
     all_countries = np.unique(np.concatenate((act_countries, fobj_countries),0))
 
-    fobjs_numcodes = data.iloc[:,6].unique() # E.g., p01.a
+    #fobjs_numcodes = data.iloc[:,6].unique() # E.g., p01.a
     fobj_alphacodes = data.iloc[:,7].unique() # E.g., C_PARI
 
-    act_numcodes = data.iloc[:,2].unique() # E.g., i01.a
+    #act_numcodes = data.iloc[:,2].unique() # E.g., i01.a
     act_alphacodes = data.iloc[:,3].unique() # E.g., A_PARI
 
     print("Working on:{} countries, {} activities, {} products".format(len(all_countries),
@@ -139,6 +141,14 @@ def makeRDF(data, code="HSUP", isInput=True):
         fo_node = URIRef("{}#{}".format(BRDFFO,fo))
         fobj_map[fo] = fo_node
 
+    # For input flows we need the supply activities
+    if isInput:
+        sat_map = {}
+        for fo in fobj_alphacodes:
+            fo_node = URIRef("{}#S_{}".format(BRDFFO,fo))
+            sat_map[fo] = fo_node
+
+
     fat_map = {}
     for fa in act_alphacodes:
         fa_node = URIRef("{}#{}".format(BRDFFAT,fa))
@@ -146,6 +156,7 @@ def makeRDF(data, code="HSUP", isInput=True):
 
 
     activity_instances_map = {}
+    sup_activity_instances_map = {}
 
     ## Here is the instantiation of the actual data, the FLOWs
     for index, row in data.iterrows():
@@ -160,8 +171,8 @@ def makeRDF(data, code="HSUP", isInput=True):
 
 
         # Load from database activity_instances ?
-        # Just take as input the asume
-        ac_key = (row[0], row[2])
+        # For now Just take as input then assume it exists
+        ac_key = (row[0], row[3])
         if ac_key in activity_instances_map:
             acNode = activity_instances_map[ac_key]
         else :
@@ -193,11 +204,46 @@ def makeRDF(data, code="HSUP", isInput=True):
         if isInput:
             # Data from HUSE / HFD
             # FLOW_URI  b:inputOf ACTIVITY_URI
-            g.add((flowNode, BONT.inputOf,acNode))
+            g.add((flowNode, BONT.inputOf, acNode))
+
+            # If this is an Input flow, then we have info on the provenance
+            # we model an anonymous activity for which we register the location
+
+            sup_ac_key = (row[4], row[7])
+            if sup_ac_key in sup_activity_instances_map:
+                sacNode = sup_activity_instances_map[sup_ac_key]
+            else :
+                # Supply activity node
+                sacNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/#sa_{}".format(code, len(sup_activity_instances_map)))
+                sup_activity_instances_map[sup_ac_key] = sacNode
+
+                # insert ACTIVITY_URI is a activty
+                g.add((sacNode, RDF.type, BONT.Activity ))
+
+                # TODO: check that activity type exists in the vocabulary
+                # ACTIVITY_TYPE_URI = the act type is a SUPPLY of specific product row[7]
+                # ACTIVITY_URI b:activityType ACTIVITY_TYPE_URI
+                g.add((sacNode, BONT.activityType, sat_map[row[7]] ))
+
+
+                # LOCATION_URI = get Location URI from row[4] country of provenance
+                # --> we do not have AGENT_URI = get Agent URI from LOCATION_URI
+                # ACTIVITY_URI b:hasLocation LOCATION_URI
+                g.add((sacNode, BONT.hasLocation, country_map[row[4]] ))
+
+
+                #ACTIVITY_URI b:hasTemporalExtent 2011_EXTENT_URI
+                g.add((sacNode, BONT.hasTemporalExtent, extent2011node ))
+
+            # This flow object is output of a generic supply activty
+            g.add((flowNode, BONT.outputOf, sacNode))
+
+
+
         else:
             # Data from HSUP
             # FLOW_URI  b:outputOf ACTIVITY_URI
-            g.add((flowNode, BONT.outputOf,acNode))
+            g.add((flowNode, BONT.outputOf, acNode))
 
         if row[10] == True:
             # ACTIVITY_URI  b:determiningFlow FLOW_URI
@@ -230,6 +276,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert EXIOBASE .csv file to RDF/TTL')
     parser.add_argument('-i','--input',
                         dest='csvfile',
+                        required=True,
                         help='<Required> path to csv file to convert')
 
     parser.add_argument('-o', '--outdir',
@@ -239,10 +286,12 @@ if __name__ == "__main__":
 
     parser.add_argument('-c', '--code',
                         dest='code',
+                        required=True,
                         help='The code of the specific file: HSUP/HUSE/HFD/Other?')
 
     parser.add_argument('--flowtype',
                       choices=['input','output'],
+                      required=True,
                       help='If the flow are input or output of activites')
 
     parser.add_argument('--format',
