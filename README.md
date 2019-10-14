@@ -26,10 +26,34 @@ python scripts/csv2rdf.py -i data/MR_HUSE_2011_v3_3_17.csv -o data/  -c HUSE --f
 ```
 
 
+## Run with Docker
+
+```bash
+docker build  . -t bonsai/converter -f converter.dockerfile
+```
+
+create `data` directory
+Download exiobase.zip inside  `data`
+unzip
+remove unused files
+
+Convert supply table to `CSV`
+
+```
+docker run --rm  -v "$PWD/data":/data bonsai/converter python3 scripts/excel2csv.py -i data/MR_HSUP_2011_v3_3_17.xlsb -o data/
+
+docker run --rm  -v "$PWD/data":/data bonsai/converter python3 scripts/excel2csv.py -i data/MR_HUSE_2011_v3_3_17.xlsb -o data/
+
+
+docker run --rm  -v "$PWD/data":/data bonsai/converter python3 scripts/csv2rdf.py -i data/MR_HUSE_2011_v3_3_17.csv -o data/  -c HUSE --flowtype input
+
+docker run --rm  -v "$PWD/data":/data bonsai/converter python3 scripts/csv2rdf.py -i data/MR_HSUP_2011_v3_3_17.csv -o data/  -c HSUP --flowtype output
+```
+
 
 
 ## Versions of Exiobase currently available
-On [exiobase.eu](https://www.exiobase.eu/index.php/component/users/?view=login&return=aHR0cHM6Ly93d3cuZXhpb2Jhc2UuZXUvaW5kZXgucGhwL2RhdGEtZG93bmxvYWQvZXhpb2Jhc2UzaHliLzEyNS1leGlvYmFzZS0zLTMtMTctaHN1dC0yMDExL2ZpbGU=&Itemid=251) there are monetary and hybid tables.
+On [exiobase.eu](https://www.exiobase.eu/index.php/component/users/?view=login&return=aHR0cHM6Ly93d3cuZXhpb2Jhc2UuZXUvaW5kZXgucGhwL2RhdGEtZG93bmxvYWQvZXhpb2Jhc2UzaHliLzEyNS1leGlvYmFzZS0zLTMtMTctaHN1dC0yMDExL2ZpbGU=&Itemid=251) there are monetary and hybrid tables.
 
 ### Monetary tables v3.4
 
