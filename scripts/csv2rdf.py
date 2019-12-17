@@ -59,9 +59,12 @@ def makeRDF(data, code="HSUP", isInput=True):
     g = Graph()
 
     BONT = Namespace('http://ontology.bonsai.uno/core#')
-    BRDFFO = Namespace("http://rdf.bonsai.uno/flowobject/exiobase3_3_17/")
-    BRDFFAT = Namespace("http://rdf.bonsai.uno/activitytype/exiobase3_3_17/")
-    BRDFDAT = Namespace("http://rdf.bonsai.uno/data/exiobase3_3_17/")
+    BRDFFO = Namespace("http://rdf.bonsai.uno/flowobject/exiobase3_3_17#")
+    BRDFLO = Namespace("http://rdf.bonsai.uno/location/exiobase3_3_17#")
+    BRDFTIME = Namespace("http://rdf.bonsai.uno/time#")
+    BRDFFAT = Namespace("http://rdf.bonsai.uno/activitytype/exiobase3_3_17#")
+    BRDFDAT = Namespace("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#".format(code.lower()))
+    BRDFPROV = Namespace("http://bonsai.uno/prov#")
     CC = Namespace('http://creativecommons.org/ns#')
     DC = Namespace('http://purl.org/dc/elements/1.1/')
     DTYPE = Namespace("http://purl.org/dc/dcmitype/")
@@ -72,12 +75,16 @@ def makeRDF(data, code="HSUP", isInput=True):
     SCHEMA = Namespace('http://schema.org/')
     TIME = Namespace('http://www.w3.org/2006/time#')
     XML = Namespace("http://www.w3.org/XML/1998/namespace")
+    PROV = Namespace("http://www.w3.org/ns/prov#")
 
 
     g.bind("bont", BONT)
     g.bind("brdffo", BRDFFO)
+    g.bind("brdflo", BRDFLO)
+    g.bind("brdftime", BRDFTIME)
     g.bind("brdffat", BRDFFAT)
     g.bind("brdfdat", BRDFDAT)
+    g.bind("brdfprov", BRDFPROV)
     g.bind("cc", CC)
     g.bind("dc", DC)
     g.bind("dtype", DTYPE)
@@ -88,21 +95,26 @@ def makeRDF(data, code="HSUP", isInput=True):
     g.bind("schema", SCHEMA)
     g.bind("time", TIME)
     g.bind("xml", XML)
+    g.bind("prov", PROV)
 
     ## Set metadata about this file
     # Author, CC licence, version
 
-    DATASET = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}".format(code.lower()))
+    DATASET = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#".format(code.lower()))
     g.add( ( DATASET, RDF.type, DTYPE.Dataset ) )
+    g.add( ( DATASET, RDF.type, PROV.Collection ) )
     g.add( ( DATASET, NS1.license, URIRef("http://creativecommons.org/licenses/by/3.0/") ) )
-    g.add( ( DATASET, DC.contributor, Literal("BONSAI team") ) )
-    g.add( ( DATASET, DC.creator, URIRef("http://bonsai.uno/foaf/bonsai.rdf#bonsai") ) )
+    g.add( ( DATASET, DC.creator, URIRef(BRDFFO.bonsai) ) )
     g.add( ( DATASET, DC.description, Literal("Flow and Activity instances extracted from EXIOBASE {} version 3.3.17".format(code)) ) )
     g.add( ( DATASET, DC.modified, Literal(datetime.date.today().strftime("%Y-%m-%d"),datatype=XSD.date) ) )
-    g.add( ( DATASET, DC.publisher, Literal("bonsai.uno") ) )
+    g.add( ( DATASET, PROV.generatedAtTIme, Literal(datetime.date.today().strftime("%Y-%m-%d"),datatype=XSD.date) ) )
+    g.add( ( DATASET, PROV.wasAttributedTo, BRDFFO.bonsai) )
+    # Script version information needs to come from file
+    g.add( ( DATASET, PROV.wasGeneratedBy, BRDFPROV["dataExtractionActivity_{}".format("0_4")]))
+    g.add( ( DATASET, DC.publisher, URIRef(BRDFFO.bonsai) ) )
     g.add( ( DATASET, DC.title, Literal("EXIOBASE {} data v. 3.3.17".format(code)) ) )
-    g.add( ( DATASET, NS0.preferredNamespaceUri, URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/#".format(code.lower())) ) )
-    g.add( ( DATASET, OWL.versionInfo, Literal("0.3") ) )
+    g.add( ( DATASET, NS0.preferredNamespaceUri, URIRef(BRDFDAT) ) )
+    g.add( ( DATASET, OWL.versionInfo, Literal("0.4") ) )
     g.add( ( DATASET, FOAF.homepage, URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/documentation.html".format(code.lower())) ) )
 
     # TODO: instantiate 2011 EXTENT URI as Temporal Extent to be assigned to the dataset
@@ -110,7 +122,7 @@ def makeRDF(data, code="HSUP", isInput=True):
     # Defined in http://rdf.bonsai.uno/time/
     #2011_EXTENT_URI time:hasBeginning time:inXSDDate for 01 Jan 2011
     #2011_EXTENT_URI time:hasEnd time:inXSDDate for 31 Dec 2011
-    extent2011node = URIRef('http://rdf.bonsai.uno/time/2011')
+    extent2011node = URIRef("{}{}".format(BRDFTIME,'2011'))
 
 
 
@@ -133,25 +145,25 @@ def makeRDF(data, code="HSUP", isInput=True):
     code = code.lower()
     country_map = {}
     for c in all_countries:
-        c_node = URIRef("http://rdf.bonsai.uno/location/exiobase3_3_17/#"+c)
+        c_node = URIRef("{}{}".format(BRDFLO,c))
         country_map[c] = c_node
 
     fobj_map = {}
     for fo in fobj_alphacodes:
-        fo_node = URIRef("{}#{}".format(BRDFFO,fo))
+        fo_node = URIRef("{}{}".format(BRDFFO,fo))
         fobj_map[fo] = fo_node
 
     # For input flows we need the supply activities
     if isInput:
         sat_map = {}
         for fo in fobj_alphacodes:
-            fo_node = URIRef("{}#S_{}".format(BRDFFO,fo))
+            fo_node = URIRef("{}S_{}".format(BRDFFO,fo))
             sat_map[fo] = fo_node
 
 
     fat_map = {}
     for fa in act_alphacodes:
-        fa_node = URIRef("{}#{}".format(BRDFFAT,fa))
+        fa_node = URIRef("{}{}".format(BRDFFAT,fa))
         fat_map[fa] = fa_node
 
 
@@ -165,9 +177,11 @@ def makeRDF(data, code="HSUP", isInput=True):
         # TODO: Here for each row we need to instantiate:
 
         # FLOW_URI = generate Flow URI For this row
-        flowNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/#f_{}".format(code,index))
+        flowNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#f_{}".format(code,index))
         # insert flow_uri is A Flow
         g.add((flowNode, RDF.type, BONT.Flow ))
+        # Add provenance namedGraph member relation
+        g.add((DATASET, PROV.hadMember, flowNode))
 
 
         # Load from database activity_instances ?
@@ -176,11 +190,14 @@ def makeRDF(data, code="HSUP", isInput=True):
         if ac_key in activity_instances_map:
             acNode = activity_instances_map[ac_key]
         else :
-            acNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/#a_{}".format(code, len(activity_instances_map)))
+            acNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#a_{}".format(code, len(activity_instances_map)))
             activity_instances_map[ac_key] = acNode
 
             # insert ACTIVITY_URI is a activty
             g.add((acNode, RDF.type, BONT.Activity ))
+
+            # Add provenance namedGraph member relation
+            g.add((DATASET, PROV.hadMember, acNode))
 
             # TODO: check that activity type exists in the vocabulary
             # ACTIVITY_TYPE_URI = get Act Type URI from row[2]/row[3]
@@ -190,8 +207,8 @@ def makeRDF(data, code="HSUP", isInput=True):
 
             # LOCATION_URI = get Location URI from row[0]
             # --> we do not have AGENT_URI = get Agent URI from LOCATION_URI
-            # ACTIVITY_URI b:hasLocation LOCATION_URI
-            g.add((acNode, BONT.hasLocation, country_map[row[0]] ))
+            # ACTIVITY_URI b:location LOCATION_URI
+            g.add((acNode, BONT.location, country_map[row[0]] ))
 
 
             #ACTIVITY_URI b:hasTemporalExtent 2011_EXTENT_URI
@@ -214,7 +231,7 @@ def makeRDF(data, code="HSUP", isInput=True):
                 sacNode = sup_activity_instances_map[sup_ac_key]
             else :
                 # Supply activity node
-                sacNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/#sa_{}".format(code, len(sup_activity_instances_map)))
+                sacNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#sa_{}".format(code, len(sup_activity_instances_map)))
                 sup_activity_instances_map[sup_ac_key] = sacNode
 
                 # insert ACTIVITY_URI is a activty
