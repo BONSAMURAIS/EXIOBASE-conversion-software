@@ -32,8 +32,33 @@ import argparse
 import numpy as np
 import pandas as pd
 
+from os import listdir
+from os.path import isfile, join
+from natsort import natsorted, ns
+import time
+
 from rdflib import Graph, Literal, BNode, Namespace, URIRef
 from rdflib.namespace import DCTERMS, FOAF, XSD, OWL, RDFS, RDF, SKOS
+
+
+def merge_files(args):
+    onlyfiles = [f for f in listdir("data") if isfile(join("data", f)) and ".nt" in f]
+
+    g = Graph()
+    for file in natsorted(onlyfiles):
+        start = time.time()
+        print("Merging file:" + file)
+        g2 = Graph()
+        g2.parse("data/{}".format(file), format=(args.format))
+
+        g = g + g2
+
+        end = time.time()
+        print("Time elasped", end - start)
+
+    print("Serializing files")
+    serialize_append_sub_graph(args, "merged", g, "final")
+    print("All graphs merged")
 
 
 def file_name(path):
@@ -214,7 +239,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
     fileCounter = 1
 
     for index, row in data.iterrows():
-        if index%100000 == 1:
+        if index%1000 == 1:
             print("Parsed {} flows / {} activities".format(index, len(activity_instances_map)))
             serialize_append_sub_graph(args, filename, g, fileCounter)
             fileCounter += 1
@@ -370,6 +395,10 @@ if __name__ == "__main__":
 
     csvfile = args.csvfile
     filename = re.sub(r'.csv$', '', file_name(csvfile))
+
+
+    merge_files(args)
+    exit()
 
     print("Parsing file: {}".format(csvfile))
     pandasDF=pd.read_csv(csvfile, header=None)

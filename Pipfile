@@ -8,6 +8,7 @@ numpy = "*"
 pandas = "*"
 rdflib = "*"
 pyxlsb = "*"
+natsort = "*"
 
 [dev-packages]
 
