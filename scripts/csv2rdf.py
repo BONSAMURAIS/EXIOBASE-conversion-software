@@ -41,23 +41,21 @@ from rdflib import Graph, Literal, BNode, Namespace, URIRef
 from rdflib.namespace import DCTERMS, FOAF, XSD, OWL, RDFS, RDF, SKOS
 
 
-def merge_files(args):
+def merge_files():
     onlyfiles = [f for f in listdir("data") if isfile(join("data", f)) and ".nt" in f]
 
-    g = Graph()
+    f = open("data/merged_flows.nt", "w")
     for file in natsorted(onlyfiles):
+        print("Working on file: {}".format(file))
         start = time.time()
-        print("Merging file:" + file)
-        g2 = Graph()
-        g2.parse("data/{}".format(file), format=(args.format))
-
-        g = g + g2
-
+        with open("data/{}".format(file), "r") as fp:
+            line = fp.readline()
+            while line and line.strip() != "":
+                f.write(line)
+                line = fp.readline()
         end = time.time()
         print("Time elasped", end - start)
 
-    print("Serializing files")
-    serialize_append_sub_graph(args, "merged", g, "final")
     print("All graphs merged")
 
 
@@ -397,7 +395,7 @@ if __name__ == "__main__":
     filename = re.sub(r'.csv$', '', file_name(csvfile))
 
 
-    merge_files(args)
+    merge_files()
     exit()
 
     print("Parsing file: {}".format(csvfile))
