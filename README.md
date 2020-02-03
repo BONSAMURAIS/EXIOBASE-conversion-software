@@ -6,26 +6,40 @@ This readme explains the reasoning behind the choice to use the hybrid (rather t
 ## Run it
 
 ### Setup
+Clone repository
+```bash
+$ git clone git@github.com:BONSAMURAIS/EXIOBASE-conversion-software.git
+$ cd EXIOBASE-conversion-software
+```
+
+Create pipenv
 
 ```bash
-pipenv install
-pipenv shell
+$ pipenv install
+$ pipenv shell
 ```
 
+### Install
+```bash
+$ python setup.py install
+```
+
+
+## Usage
+### As a command line tool
 ### Convert `xslb` to `csv`
 ```
-python scripts/excel2csv.py -i data/MR_HSUP_2011_v3_3_17.xlsb -o data/
-
-python scripts/excel2csv.py -i data/MR_HUSE_2011_v3_3_17.xlsb -o data/
+$ excel2csv-cli -i data/MR_HSUP_2011_v3_3_17.xlsb -o data/
+$ excel2csv-cli -i data/MR_HUSE_2011_v3_3_17.xlsb -o data/
 ```
 
-### Convert `csv` to `ttl`
+### Convert `csv` to `nt`
 ```
-python scripts/csv2rdf.py -i data/MR_HSUP_2011_v3_3_17.csv -o data/  -c HSUP --flowtype output
-python scripts/csv2rdf.py -i data/MR_HUSE_2011_v3_3_17.csv -o data/  -c HUSE --flowtype input
+csv2rdf-cli -i data/MR_HSUP_2011_v3_3_17.csv -o data/  -c HSUP --flowtype output
+csv2rdf-cli -i data/MR_HUSE_2011_v3_3_17.csv -o data/  -c HUSE --flowtype input
 ```
 
-
+<!---
 ## Run with Docker
 
 ```bash
@@ -49,7 +63,7 @@ docker run --rm  -v "$PWD/data":/data bonsai/converter python3 scripts/csv2rdf.p
 
 docker run --rm  -v "$PWD/data":/data bonsai/converter python3 scripts/csv2rdf.py -i data/MR_HSUP_2011_v3_3_17.csv -o data/  -c HSUP --flowtype output
 ```
-
+-->
 
 
 ## Versions of Exiobase currently available

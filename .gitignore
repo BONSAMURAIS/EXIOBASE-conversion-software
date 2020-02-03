@@ -156,9 +156,9 @@ dmypy.json
 .pyre/
 
 # Data
-EXIOBASE_conversion_software/data*/*.xlsb
-EXIOBASE_conversion_software/data*/*.csv
-EXIOBASE_conversion_software/data*/*.rdf
-EXIOBASE_conversion_software/data*/*.ttl
-EXIOBASE_conversion_software/data*/*.nt
+data*/*.xlsb
+data*/*.csv
+data*/*.rdf
+data*/*.ttl
+data*/*.nt
 .vscode/**

@@ -7,7 +7,7 @@ __all__ = (
 VERSION = (0, 4)
 __version__ = ".".join(str(v) for v in VERSION)
 
-data_dir = "data"
+data_dir = "../data"
 
 from .csv2rdf import csv2rdf
 from .excel2csv import excel2csv
