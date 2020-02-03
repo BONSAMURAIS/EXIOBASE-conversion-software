@@ -86,19 +86,7 @@ def xlsb2csv(xlsb, outdir, sheetnum = 2, csvOut=None):
     outDF.to_csv(csvOut, header=False, index=False)
     return outDF
 
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser(description='Convert EXIOBASE .xslb file to csv')
-    parser.add_argument('-i','--import',
-                        dest='exfile',
-                        help='<Required> path to file to convert')
-
-    parser.add_argument('-o', '--outdir',
-                        dest='outdir',
-                        default='./',
-                        help='Output directory')
-
-    args = parser.parse_args()
+def excel2csv(args):
 
     exfile = args.exfile
     outdir = args.outdir

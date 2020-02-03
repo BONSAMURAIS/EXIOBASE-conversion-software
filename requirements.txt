@@ -1,0 +1,5 @@
+numpy
+docopt
+pyxlsb
+pandas
+rdflib

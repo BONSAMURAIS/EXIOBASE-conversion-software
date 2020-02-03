@@ -34,21 +34,23 @@ import pandas as pd
 
 from os import listdir
 from os.path import isfile, join
-from natsort import natsorted, ns
 import time
 
 from rdflib import Graph, Literal, BNode, Namespace, URIRef
 from rdflib.namespace import DCTERMS, FOAF, XSD, OWL, RDFS, RDF, SKOS
 
+def merge_files(args, filename):
+    outdir = args.outdir
+    if not outdir.endswith('/'):
+        outdir = outdir + '/'
 
-def merge_files():
-    onlyfiles = [f for f in listdir("data") if isfile(join("data", f)) and ".nt" in f]
+    ntFiles = [f for f in listdir(outdir) if isfile(join(outdir, f)) and ".nt" in f]
 
-    f = open("data/merged_flows.nt", "w")
-    for file in natsorted(onlyfiles):
+    f = open("{}{}_merged.nt".format(outdir, filename), "w")
+    for file in ntFiles:
         print("Working on file: {}".format(file))
         start = time.time()
-        with open("data/{}".format(file), "r") as fp:
+        with open("{}{}".format(outdir, file), "r") as fp:
             line = fp.readline()
             while line and line.strip() != "":
                 f.write(line)
@@ -64,23 +66,23 @@ def file_name(path):
     return tail or ntpath.basename(head)
 
 
-def serialize_append_sub_graph(args, filename, graph, index):
+def serialize_graph(args, filename, graph, index=None):
     outdir = args.outdir
     if not outdir.endswith('/'):
         outdir = outdir + '/'
 
-    rdfOut = outdir + filename + '_' + str(index) + '.' + args.format
+    if args.multifile:
+        rdfOut = outdir + filename + '_' + str(index) + '.' + args.format
+    else:
+        rdfOut = outdir + filename + '.' + args.format
 
-    # Output format default is NT so that i can be splitted
     graph.serialize(destination=rdfOut, format=args.format)
 
 
-def setup_global_namespaces(code):
-    # Make them global
-    global BONT, BRDFFO, BRDFLO, BRDFTIME, BRDFFAT, BRDFFOAF
-    global BRDFDAT, BRDFPROV, CC, DC, DTYPE, NS0, NS1, OM2, OT, SCHEMA, TIME, XML, PROV
+def setup_namespaces(code):
+    global BONT, BRDFFO, BRDFLO, BRDFTIME, BRDFFAT, BRDFFOAF, BRDFDAT, BRDFPROV
+    global CC, DC, DTYPE, NS0, NS1, OM2, OT, SCHEMA, TIME, XML, PROV
 
-    # Global Namespaces
     BONT = Namespace('http://ontology.bonsai.uno/core#')
     BRDFFO = Namespace("http://rdf.bonsai.uno/flowobject/exiobase3_3_17#")
     BRDFLO = Namespace("http://rdf.bonsai.uno/location/exiobase3_3_17#")
@@ -128,9 +130,7 @@ def setup_empty_graph():
     return g
 
 
-def get_graph_meta_data(code):
-    g = Graph()
-
+def append_meta_data(g, code):
     DATASET = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}".format(code.lower()))
     g.add((DATASET, RDF.type, DTYPE.Dataset))
     g.add((DATASET, RDF.type, PROV.Collection))
@@ -167,15 +167,8 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
     # cols 2/3 are redundant, 6/7 are also redundant -> we use only 3 and 7
     '''
 
-    # Global Namespaces
-    setup_global_namespaces(code)
-
-    ## Set metadata about this file
-    # Author, CC licence, version
-    g = get_graph_meta_data(code)
-
-    # Save metadata about file
-    serialize_append_sub_graph(args, filename, g, 0)
+    # Setup namespaces
+    setup_namespaces(code)
 
     # TODO: instantiate 2011 EXTENT URI as Temporal Extent to be assigned to the dataset
 
@@ -183,8 +176,6 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
     #2011_EXTENT_URI time:hasBeginning time:inXSDDate for 01 Jan 2011
     #2011_EXTENT_URI time:hasEnd time:inXSDDate for 31 Dec 2011
     extent2011node = URIRef("{}{}".format(BRDFTIME,'2011'))
-
-
 
     # TODO: Load Flow Objects, activity types, etc .. ?
     # This extracts the instances, they should have a mapping in the taxonomy above
@@ -198,7 +189,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
     #act_numcodes = data.iloc[:,2].unique() # E.g., i01.a
     act_alphacodes = data.iloc[:,3].unique() # E.g., A_PARI
 
-    print("Working on:{} countries, {} activities, {} products".format(len(all_countries),
+    print("Working on: {} countries, {} activities, {} products".format(len(all_countries),
                                                                     len(fobj_alphacodes),
                                                                     len(act_alphacodes)
                                                                     ))
@@ -234,14 +225,21 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
     ## Create new graph
     DATASET = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}".format(code.lower()))
     g = setup_empty_graph()
+    g = append_meta_data(g, code)
     fileCounter = 1
 
     for index, row in data.iterrows():
-        if index%1000 == 1:
-            print("Parsed {} flows / {} activities".format(index, len(activity_instances_map)))
-            serialize_append_sub_graph(args, filename, g, fileCounter)
-            fileCounter += 1
-            g = setup_empty_graph()
+        if args.multifile:
+            if index%int(args.multifile) == 0 and index != 0:
+                print("Parsed {} flows / {} activities".format(index, len(activity_instances_map)))
+                serialize_graph(args, filename, g, fileCounter)
+                fileCounter += 1
+                g = setup_empty_graph()
+                g = append_meta_data(g, code.lower())
+        else:
+            if index%1000 == 1:
+                print("Parsed {} flows / {} activities".format(index, len(activity_instances_map)))
+
         # TODO: Here for each row we need to instantiate:
 
         # FLOW_URI = generate Flow URI For this row
@@ -356,52 +354,25 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
         g.add((flowNode,  BONT.objectType, fobj_map[row[7]]))
 
     # Serialize the last of the triples
-
-    serialize_append_sub_graph(args, filename, g, fileCounter)
-
-
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser(description='Convert EXIOBASE .csv file to RDF/TTL')
-    parser.add_argument('-i','--input',
-                        dest='csvfile',
-                        required=True,
-                        help='<Required> path to csv file to convert')
-
-    parser.add_argument('-o', '--outdir',
-                        dest='outdir',
-                        default='./',
-                        help='Output directory')
-
-    parser.add_argument('-c', '--code',
-                        dest='code',
-                        required=True,
-                        help='The code of the specific file: HSUP/HUSE/HFD/Other?')
-
-    parser.add_argument('--flowtype',
-                      choices=['input','output'],
-                      required=True,
-                      help='If the flow are input or output of activites')
-
-    parser.add_argument('--format',
-                      choices=['nt','ttl', 'xml'],
-                      default='nt',
-                      help='The output format')
+    serialize_graph(args, filename, g, fileCounter)
 
 
-    args = parser.parse_args()
+def csv2rdf(args):
+
+    # If multifile is set, set format to nt
+    if args.multifile:
+        args.format = 'nt'
 
     csvfile = args.csvfile
     filename = re.sub(r'.csv$', '', file_name(csvfile))
-
-
-    merge_files()
-    exit()
 
     print("Parsing file: {}".format(csvfile))
     pandasDF=pd.read_csv(csvfile, header=None)
 
     # Create graph
-    rdfGraph = makeRDF(args, filename, pandasDF, args.code, isInput=(args.flowtype == 'input'))
+    makeRDF(args, filename, pandasDF, args.code, isInput=(args.flowtype == 'input'))
+
+    if args.merge:
+        merge_files()
 
     print("Extracting and serializing triples from csv file Done!")
