@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Arborist CLI.
+"""EXIOBASE-conversion-software excel2csv CLI.
 Usage:
-  arborist-cli regenerate <dirpath>
+  excel2csv-cli -i <input/dirpath> -o <output/dirpath>
 Options:
   -h --help     Show this screen.
   --version     Show version.

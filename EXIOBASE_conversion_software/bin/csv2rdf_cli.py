@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Arborist CLI.
+"""EXIOBASE-conversion-software csv2rdf-cli CLI.
 Usage:
-  arborist-cli regenerate <dirpath>
+  csv2rdf-cli  -i <input/dirpath> -o <output/dirpath>  -c <HSUP/HUSE> --flowtype <input/output>
 Options:
   -h --help     Show this screen.
   --version     Show version.
