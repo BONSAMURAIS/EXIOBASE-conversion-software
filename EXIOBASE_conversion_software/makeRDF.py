@@ -29,7 +29,7 @@ from pathlib import Path
 from rdflib import Graph, Literal, BNode, Namespace, RDF, URIRef
 from rdflib.namespace import DC, FOAF, XSD, OWL, RDFS
 import numpy as np
-from excel2csv import xlsb2csv
+from .excel2csv import xlsb2csv
 import pandas as pd
 def getAndSetNode(nID, ojDict, ojType="L"):
         '''
@@ -253,7 +253,7 @@ def makeRDF(inputDF):
         # asociate product to measure
         g.add(  (thisProduct, DEF.hasAmount, thisAmount))
     return g
-if __name__ == "__main__":
+def makeRdf():
 
     exfile = sys.argv[1]
     filename = Path(exfile).stem
