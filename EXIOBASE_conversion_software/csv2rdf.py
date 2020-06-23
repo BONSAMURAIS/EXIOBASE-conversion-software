@@ -28,6 +28,7 @@ import sys
 import ntpath
 import datetime
 import argparse
+from . import __version_dot__, __version_dash__
 
 import numpy as np
 import pandas as pd
@@ -38,6 +39,7 @@ import time
 
 from rdflib import Graph, Literal, BNode, Namespace, URIRef
 from rdflib.namespace import DCTERMS, FOAF, XSD, OWL, RDFS, RDF, SKOS
+
 
 def merge_files(args, filename):
     outdir = args.outdir
@@ -88,9 +90,9 @@ def setup_namespaces(code):
     BRDFLO = Namespace("http://rdf.bonsai.uno/location/exiobase3_3_17#")
     BRDFTIME = Namespace("http://rdf.bonsai.uno/time#")
     BRDFFAT = Namespace("http://rdf.bonsai.uno/activitytype/exiobase3_3_17#")
-    BRDFFOAF = Namespace("http://rdf.bonsai.uno/foaf#")
+    BRDFFOAF = Namespace("http://rdf.bonsai.uno/foaf/exiobase3_3_17#")
     BRDFDAT = Namespace("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#".format(code.lower()))
-    BRDFPROV = Namespace("http://rdf.bonsai.uno/prov#")
+    BRDFPROV = Namespace("http://rdf.bonsai.uno/prov/exiobase3_3_17#")
     CC = Namespace('http://creativecommons.org/ns#')
     DC = Namespace('http://purl.org/dc/elements/1.1/')
     DTYPE = Namespace("http://purl.org/dc/dcmitype/")
@@ -141,11 +143,10 @@ def append_meta_data(g, code):
     g.add((DATASET, DC.modified, Literal(datetime.date.today().strftime("%Y-%m-%d"), datatype=XSD.date)))
     g.add((DATASET, PROV.generatedAtTIme, Literal(datetime.date.today().strftime("%Y-%m-%d"), datatype=XSD.date)))
     g.add((DATASET, PROV.wasAttributedTo, BRDFFOAF.bonsai))
-    # Script version information needs to come from file
-    g.add((DATASET, PROV.wasGeneratedBy, BRDFPROV["dataExtractionActivity_{}".format("0_4")]))
+    g.add((DATASET, PROV.wasGeneratedBy, BRDFPROV["dataExtractionActivity_{}".format(__version_dash__)]))
     g.add((DATASET, DC.title, Literal("EXIOBASE {} data v. 3.3.17".format(code))))
     g.add((DATASET, NS0.preferredNamespaceUri, URIRef(BRDFDAT)))
-    g.add((DATASET, OWL.versionInfo, Literal("0.4")))
+    g.add((DATASET, OWL.versionInfo, Literal(__version_dot__)))
     g.add((DATASET, FOAF.homepage,
         URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/documentation.html".format(code.lower()))))
 
@@ -243,12 +244,22 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
         # TODO: Here for each row we need to instantiate:
 
         # FLOW_URI = generate Flow URI For this row
-        flowNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#f_{}".format(code,index))
+        flowNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#F_{}".format(code,index))
         # insert flow_uri is A Flow
         g.add((flowNode, RDF.type, BONT.Flow ))
         # Add provenance namedGraph member relation
         g.add((DATASET, PROV.hadMember, flowNode))
 
+        # Balanceable Property
+        balanceNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#B_{}".format(code, index))
+        g.add((balanceNode, RDF.type, BONT.BalanceableProperty))
+        g.add((balanceNode, OM2.hasNumericalValue, Literal(row[9], datatype=XSD.float) ))
+
+        # Balanceable Property Provenance
+        g.add((DATASET, PROV.hadMember, balanceNode))
+
+        # hasBalanceableProperty added to flow
+        g.add((flowNode, BONT.hasBalanceableProperty, balanceNode))
 
         # Load from database activity_instances ?
         # For now Just take as input then assume it exists
@@ -256,7 +267,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
         if ac_key in activity_instances_map:
             acNode = activity_instances_map[ac_key]
         else :
-            acNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#a_{}".format(code, len(activity_instances_map)))
+            acNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#A_{}".format(code, len(activity_instances_map)))
             activity_instances_map[ac_key] = acNode
 
             # insert ACTIVITY_URI is a activty
@@ -268,13 +279,13 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
             # TODO: check that activity type exists in the vocabulary
             # ACTIVITY_TYPE_URI = get Act Type URI from row[2]/row[3]
             # ACTIVITY_URI b:activityType ACTIVITY_TYPE_URI
-            g.add((acNode, BONT.activityType, fat_map[row[3]] ))
+            g.add((acNode, BONT.hasActivityType, fat_map[row[3]] ))
 
 
             # LOCATION_URI = get Location URI from row[0]
             # --> we do not have AGENT_URI = get Agent URI from LOCATION_URI
             # ACTIVITY_URI b:location LOCATION_URI
-            g.add((acNode, BONT.location, country_map[row[0]] ))
+            g.add((acNode, BONT.hasLocation, country_map[row[0]] ))
 
 
             #ACTIVITY_URI b:hasTemporalExtent 2011_EXTENT_URI
@@ -287,7 +298,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
         if isInput:
             # Data from HUSE / HFD
             # FLOW_URI  b:inputOf ACTIVITY_URI
-            g.add((flowNode, BONT.inputOf, acNode))
+            g.add((flowNode, BONT.isInputOf, acNode))
 
             # If this is an Input flow, then we have info on the provenance
             # we model an anonymous activity for which we register the location
@@ -306,7 +317,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
                 # TODO: check that activity type exists in the vocabulary
                 # ACTIVITY_TYPE_URI = the act type is a SUPPLY of specific product row[7]
                 # ACTIVITY_URI b:activityType ACTIVITY_TYPE_URI
-                g.add((sacNode, BONT.activityType, sat_map[row[7]] ))
+                g.add((sacNode, BONT.hasActivityType, sat_map[row[7]] ))
 
                 # Add provenance namedGraph member relation
                 g.add((DATASET, PROV.hadMember, sacNode))
@@ -316,53 +327,59 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
                 # ACTIVITY_URI b:hasLocation LOCATION_URI
                 g.add((sacNode, BONT.hasLocation, country_map[row[4]] ))
 
-
                 #ACTIVITY_URI b:hasTemporalExtent 2011_EXTENT_URI
                 g.add((sacNode, BONT.hasTemporalExtent, extent2011node ))
 
             # This flow object is output of a generic supply activty
-            g.add((flowNode, BONT.outputOf, sacNode))
+            g.add((flowNode, BONT.isOutputOf, sacNode))
 
 
 
         else:
             # Data from HSUP
             # FLOW_URI  b:outputOf ACTIVITY_URI
-            g.add((flowNode, BONT.outputOf, acNode))
+            g.add((flowNode, BONT.isOutputOf, acNode))
 
         if row[10] == True:
             # ACTIVITY_URI  b:determiningFlow FLOW_URI
-            g.add((acNode,  BONT.determiningFlow, flowNode))
+            g.add((acNode,  BONT.hasDeterminingFlow, flowNode))
         elif row[10] != False:
             print("ERRRRRRR ",row[10])
             exit(3)
 
-        g.add((flowNode, OM2.hasNumericValue, Literal(row[9], datatype=XSD.float) ))
+        g.add((flowNode, OM2.hasNumericalValue, Literal(row[9], datatype=XSD.float) ))
 
 
         # om2:hasUnit om2:kilogram  row[8]
         if 'kilogram' in row[8]:
             g.add((flowNode,  OM2.hasUnit, OM2.kilogram))
+            g.add((balanceNode,  OM2.hasUnit, OM2.kilogram))
         elif 'tonne' in row[8]:
             g.add((flowNode,  OM2.hasUnit, OM2.tonne))
+            g.add((balanceNode,  OM2.hasUnit, OM2.tonne))
         else :
             # Uknown, let's hope for the best
             g.add((flowNode,  OM2.hasUnit, OM2[row[8]]))
+            g.add((balanceNode,  OM2.hasUnit, OM2[row[8]]))
+
+        balance_types = {
+            "tonnes": "DryMass",
+            "mj": "Energy",
+            "tj": "Energy",
+            "meuro": "AmountOfMoney"
+        }
+        g.add((balanceNode, BONT.hasBalanceablePropertyType, OM2[balance_types[row[8].lower()]]))
+        g.add((balanceNode, RDFS.label, Literal("{};{} {}".format(row[5], row[9], row[8]), datatype=XSD.string)))
 
         # FLOW_URI bont:objectType _:uri41 .
         # FLOW_URI b:objectType get URI OF FLow Object (row[6]/row[7])
-        g.add((flowNode,  BONT.objectType, fobj_map[row[7]]))
+        g.add((flowNode,  BONT.hasObjectType, fobj_map[row[7]]))
 
     # Serialize the last of the triples
     serialize_graph(args, filename, g, fileCounter)
 
 
 def csv2rdf(args):
-
-    # If multifile is set, set format to nt
-    if args.multifile:
-        args.format = 'nt'
-
     csvfile = args.csvfile
     filename = re.sub(r'.csv$', '', file_name(csvfile))
 
@@ -372,7 +389,7 @@ def csv2rdf(args):
     # Create graph
     makeRDF(args, filename, pandasDF, args.code, isInput=(args.flowtype == 'input'))
 
-    if args.merge:
-        merge_files()
+    if args.merge and args.format == 'nt':
+        merge_files(args, 'flows')
 
     print("Extracting and serializing triples from csv file Done!")

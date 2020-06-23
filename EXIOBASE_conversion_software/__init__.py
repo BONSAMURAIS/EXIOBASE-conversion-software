@@ -4,8 +4,9 @@ __all__ = (
     "makeRDF",
 )
 
-VERSION = (0, 4)
-__version__ = ".".join(str(v) for v in VERSION)
+VERSION = (0, 5)
+__version_dot__ = ".".join(str(v) for v in VERSION)
+__version_dash__ = "_".join(str(v) for v in VERSION)
 
 data_dir = "../data"
 

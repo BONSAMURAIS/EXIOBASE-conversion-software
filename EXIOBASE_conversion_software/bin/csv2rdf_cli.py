@@ -32,23 +32,24 @@ def main():
                         help='The code of the specific file: HSUP/HUSE/HFD/Other?')
 
     parser.add_argument('--flowtype',
-                      choices=['input','output'],
-                      required=True,
-                      help='If the flow are input or output of activites')
+                        choices=['input','output'],
+                        required=True,
+                        help='If the flow are input or output of activites')
 
     parser.add_argument('--format',
-                      choices=['nt','ttl', 'xml'],
-                      default='nt',
-                      help='The output format')
+                        choices=['nt','ttl', 'xml'],
+                        default='nt',
+                        help='The output format')
 
     parser.add_argument('--multifile',
-                      default=100000,
-                      dest="multifile",
-                      help='Create multiple files each with x triples. Restricted to nt format.')
+                        default=100000,
+                        dest="multifile",
+                        help='Create multiple files each with x triples. Restricted to nt format.')
 
     parser.add_argument('--merge',
-                      dest="merge",
-                      help='If multifile is chosen, merge all nt files')
+                        default=True,
+                        dest="merge",
+                        help='If multifile is chosen, merge all nt files')
 
     args = parser.parse_args()
 
