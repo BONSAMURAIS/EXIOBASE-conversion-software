@@ -75,7 +75,7 @@ def xlsb2csv(xlsb, outdir, sheetnum = 2, csvOut=None):
         for j in range(startCol, cols):
             # read values
             if csvDF.iat[i,j] != 0: # Commented out to filter in the end with pandas
-                mainFlow = (j == (i + 1))
+                mainFlow = False  # TODO: (j == (i + 1))  # Determining flow currently not working
                 colAnnot = actTrans.iloc[j]
                 rowAnnot = csvDF.iloc[i,0:5]
                 outRow = np.concatenate((colAnnot, rowAnnot, [csvDF.iloc[i,j]], [mainFlow]),0)
