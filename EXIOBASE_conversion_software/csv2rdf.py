@@ -27,6 +27,7 @@ import re
 import sys
 import ntpath
 import datetime
+from io import StringIO
 import argparse
 from . import __version_dot__, __version_dash__
 
@@ -253,7 +254,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
         # Balanceable Property
         balanceNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#B_{}".format(code, index))
         g.add((balanceNode, RDF.type, BONT.BalanceableProperty))
-        g.add((balanceNode, OM2.hasNumericalValue, Literal(row[9], datatype=XSD.float) ))
+        g.add((balanceNode, OM2.hasNumericalValue, Literal(row[9], datatype=XSD.float)))
 
         # Balanceable Property Provenance
         g.add((DATASET, PROV.hadMember, balanceNode))
@@ -271,7 +272,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
             activity_instances_map[ac_key] = acNode
 
             # insert ACTIVITY_URI is a activty
-            g.add((acNode, RDF.type, BONT.Activity ))
+            g.add((acNode, RDF.type, BONT.Activity))
 
             # Add provenance namedGraph member relation
             g.add((DATASET, PROV.hadMember, acNode))
@@ -279,17 +280,17 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
             # TODO: check that activity type exists in the vocabulary
             # ACTIVITY_TYPE_URI = get Act Type URI from row[2]/row[3]
             # ACTIVITY_URI b:activityType ACTIVITY_TYPE_URI
-            g.add((acNode, BONT.hasActivityType, fat_map[row[3]] ))
+            g.add((acNode, BONT.hasActivityType, fat_map[row[3]]))
 
 
             # LOCATION_URI = get Location URI from row[0]
             # --> we do not have AGENT_URI = get Agent URI from LOCATION_URI
             # ACTIVITY_URI b:location LOCATION_URI
-            g.add((acNode, BONT.hasLocation, country_map[row[0]] ))
+            g.add((acNode, BONT.hasLocation, country_map[row[0]]))
 
 
             #ACTIVITY_URI b:hasTemporalExtent 2011_EXTENT_URI
-            g.add((acNode, BONT.hasTemporalExtent, extent2011node ))
+            g.add((acNode, BONT.hasTemporalExtent, extent2011node))
 
 
         # Insert in RDF data
@@ -340,21 +341,18 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
             # FLOW_URI  b:outputOf ACTIVITY_URI
             g.add((flowNode, BONT.isOutputOf, acNode))
 
-        if row[10] == True:
+        if row[10]:
             # ACTIVITY_URI  b:determiningFlow FLOW_URI
             g.add((acNode,  BONT.hasDeterminingFlow, flowNode))
-        elif row[10] != False:
-            print("ERRRRRRR ",row[10])
-            exit(3)
 
         g.add((flowNode, OM2.hasNumericalValue, Literal(row[9], datatype=XSD.float) ))
 
 
         # om2:hasUnit om2:kilogram  row[8]
-        if 'kilogram' in row[8]:
+        if row[8] == 'kilogram':
             g.add((flowNode,  OM2.hasUnit, OM2.kilogram))
             g.add((balanceNode,  OM2.hasUnit, OM2.kilogram))
-        elif 'tonne' in row[8]:
+        elif row[8] == 'tonne':
             g.add((flowNode,  OM2.hasUnit, OM2.tonne))
             g.add((balanceNode,  OM2.hasUnit, OM2.tonne))
         else :
@@ -384,7 +382,9 @@ def csv2rdf(args):
     filename = re.sub(r'.csv$', '', file_name(csvfile))
 
     print("Parsing file: {}".format(csvfile))
-    pandasDF=pd.read_csv(csvfile, header=None)
+
+    pandasDF=pd.read_csv(csvfile, header=None, float_precision="high")
+    print(pandasDF.head())
 
     # Create graph
     makeRDF(args, filename, pandasDF, args.code, isInput=(args.flowtype == 'input'))

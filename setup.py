@@ -16,7 +16,7 @@ setup(
     author="BONSAI team",
     author_email="info@bonsai.uno",
     license=open('LICENSE').read(),
-    # package_data={'EXIOBASE_conversion_software': package_files(os.path.join('EXIOBASE_conversion_software', 'data'))},
+    package_data={'EXIOBASE_conversion_software': package_files(os.path.join('EXIOBASE_conversion_software', 'data'))},
     entry_points = {
         'console_scripts': [
             'csv2rdf-cli = EXIOBASE_conversion_software.bin.csv2rdf_cli:main',
