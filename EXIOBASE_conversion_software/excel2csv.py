@@ -112,8 +112,8 @@ def xlsb2csv(xlsb, outdir, sheetnum=1, csvOut=None):
     startCol = 5
     print("Parsed sheet has size {}".format(csvDF.shape))
 
-    ## Separates Header information from actual data
-    actTrans = csvDF.iloc[:4, ].transpose() # Get the subset for activities
+    # Separates Header information from actual data
+    actTrans = csvDF.iloc[:4, ].transpose()  # Get the subset for activities
     outDF = []
     rows = csvDF.shape[0]
     cols = csvDF.shape[1]
@@ -153,7 +153,6 @@ def excel2csv(args):
     # -> year + timestamp of production + version number
     # This metada is not parsed currently
 
-
     # File HSUP & HUSE both parse sheet number 2
 
     # File HSUT_extension contains both outputs and input flows
@@ -162,6 +161,5 @@ def excel2csv(args):
 
     # HFD  sheet FD (2) for Final demand and sheet stock_to_waste (3) for Stock to waste
     # This one is missing the activity types 6+1
-
 
     xlsb2csv(exfile, outdir)

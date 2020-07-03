@@ -10,18 +10,18 @@
 
 # Copyright (C) 2018  Vang Quy Le
 
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
 import os
@@ -38,7 +38,7 @@ from os.path import isfile, join
 import pkg_resources
 
 from rdflib import Graph, Literal, Namespace, URIRef
-from rdflib.namespace import FOAF, XSD, OWL, RDFS, RDF, SKOS
+from rdflib.namespace import FOAF, XSD, OWL, RDFS, RDF
 
 
 def merge_files(args, filename):
@@ -156,7 +156,7 @@ def append_meta_data(g, code):
     g.add((DATASET, NS0.preferredNamespaceUri, URIRef(BRDFDAT)))
     g.add((DATASET, OWL.versionInfo, Literal(__version_dot__)))
     g.add((DATASET, FOAF.homepage,
-        URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/documentation.html".format(code.lower()))))
+           URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/documentation.html".format(code.lower()))))
 
     return g
 
@@ -182,21 +182,21 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
     # TODO: instantiate 2011 EXTENT URI as Temporal Extent to be assigned to the dataset
 
     # Defined in http://rdf.bonsai.uno/time/
-    #2011_EXTENT_URI time:hasBeginning time:inXSDDate for 01 Jan 2011
-    #2011_EXTENT_URI time:hasEnd time:inXSDDate for 31 Dec 2011
-    extent2011node = URIRef("{}{}".format(BRDFTIME,'2011'))
+    # 2011_EXTENT_URI time:hasBeginning time:inXSDDate for 01 Jan 2011
+    # 2011_EXTENT_URI time:hasEnd time:inXSDDate for 31 Dec 2011
+    extent2011node = URIRef("{}{}".format(BRDFTIME, '2011'))
 
     # TODO: Load Flow Objects, activity types, etc .. ?
     # This extracts the instances, they should have a mapping in the taxonomy above
-    act_countries = data.iloc[:,0].unique()  # E.g., AU
-    fobj_countries = data.iloc[:,4].unique()
-    all_countries = np.unique(np.concatenate((act_countries, fobj_countries),0))
+    act_countries = data.iloc[:, 0].unique()  # E.g., AU
+    fobj_countries = data.iloc[:, 4].unique()
+    all_countries = np.unique(np.concatenate((act_countries, fobj_countries), 0))
 
-    #fobjs_numcodes = data.iloc[:,6].unique() # E.g., p01.a
-    fobj_alphacodes = data.iloc[:,7].unique() # E.g., C_PARI
+    # fobjs_numcodes = data.iloc[:,6].unique() # E.g., p01.a
+    fobj_alphacodes = data.iloc[:, 7].unique()  # E.g., C_PARI
 
-    #act_numcodes = data.iloc[:,2].unique() # E.g., i01.a
-    act_alphacodes = data.iloc[:,3].unique() # E.g., A_PARI
+    # act_numcodes = data.iloc[:,2].unique() # E.g., i01.a
+    act_alphacodes = data.iloc[:, 3].unique()  # E.g., A_PARI
 
     agg_obj_act_map = {'C_CLPT': 'A_COAL',
                        'C_GASS': 'A_GASE',
@@ -206,30 +206,30 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
                        'C_BGAS': 'A_MGWG'}
 
     print("Working on: {} countries, {} activities, {} products".format(len(all_countries),
-                                                                    len(fobj_alphacodes),
-                                                                    len(act_alphacodes)
-                                                                    ))
+                                                                        len(fobj_alphacodes),
+                                                                        len(act_alphacodes)
+                                                                        ))
     code = code.lower()
     country_map = {}
     for c in all_countries:
-        c_node = URIRef("{}{}".format(BRDFLO,c))
+        c_node = URIRef("{}{}".format(BRDFLO, c))
         country_map[c] = c_node
 
     fobj_map = {}
     for fo in fobj_alphacodes:
-        fo_node = URIRef("{}{}".format(BRDFFO,fo))
+        fo_node = URIRef("{}{}".format(BRDFFO, fo))
         fobj_map[fo] = fo_node
 
     # For input flows we need the supply activities
     if isInput:
         sat_map = {}
         for fo in fobj_alphacodes:
-            fo_node = URIRef("{}S_{}".format(BRDFFO,fo))
+            fo_node = URIRef("{}S_{}".format(BRDFFO, fo))
             sat_map[fo] = fo_node
 
     fat_map = {}
     for fa in act_alphacodes:
-        fa_node = URIRef("{}{}".format(BRDFFAT,fa))
+        fa_node = URIRef("{}{}".format(BRDFFAT, fa))
         fat_map[fa] = fa_node
 
     # Load Exiobase Classifications
@@ -238,15 +238,15 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
     obj_agg = load_dataset(file_handler, "Product_activity_correspondence")
     agg_products = ['C_CLPT', 'C_GASS', 'C_COPR', 'C_REFP', 'C_CHBI', 'C_BGAS']
     agg_map = {product: agg_product for product, agg_product in
-                    zip(obj_agg["product_code"], obj_agg['agg_product_code']) if agg_product in agg_products}
+               zip(obj_agg["product_code"], obj_agg['agg_product_code']) if agg_product in agg_products}
 
     activity_instances_map = {}
     sup_activity_instances_map = {}
     agg_flows_map = dict()
     aggregate = disaggregate = False
 
-    ## Here is the instantiation of the actual data, the FLOWs
-    ## Create new graph
+    # Here is the instantiation of the actual data, the FLOWs
+    # Create new graph
     DATASET = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}".format(code.lower()))
     g = setup_empty_graph()
     g = append_meta_data(g, code)
@@ -255,14 +255,14 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
     for index, row in data.iterrows():
         print(index)
         if args.multifile:
-            if index%int(args.multifile) == 0 and index != 0:
+            if index % int(args.multifile) == 0 and index != 0:
                 print("Parsed {} flows / {} activities".format(index, len(activity_instances_map)))
                 serialize_graph(args, filename, g, fileCounter)
                 fileCounter += 1
                 g = setup_empty_graph()
                 g = append_meta_data(g, code.lower())
         else:
-            if index%1000 == 1:
+            if index % 1000 == 1:
                 print("Parsed {} flows / {} activities".format(index, len(activity_instances_map)))
 
         # Is the data an aggregate or disaggregate flow
@@ -299,8 +299,9 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
         ac_key = (row[0], row[3])
         if ac_key in activity_instances_map:
             acNode = activity_instances_map[ac_key]
-        else :
-            acNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#A_{}".format(code, len(activity_instances_map)))
+        else:
+            acNode = URIRef(
+                "http://rdf.bonsai.uno/data/exiobase3_3_17/{}#A_{}".format(code, len(activity_instances_map)))
             activity_instances_map[ac_key] = acNode
 
             # insert ACTIVITY_URI is a activty
@@ -314,16 +315,13 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
             # ACTIVITY_URI b:activityType ACTIVITY_TYPE_URI
             g.add((acNode, BONT.hasActivityType, fat_map[row[3]]))
 
-
             # LOCATION_URI = get Location URI from row[0]
             # --> we do not have AGENT_URI = get Agent URI from LOCATION_URI
             # ACTIVITY_URI b:location LOCATION_URI
             g.add((acNode, BONT.hasLocation, country_map[row[0]]))
 
-
-            #ACTIVITY_URI b:hasTemporalExtent 2011_EXTENT_URI
+            # ACTIVITY_URI b:hasTemporalExtent 2011_EXTENT_URI
             g.add((acNode, BONT.hasTemporalExtent, extent2011node))
-
 
         # Insert in RDF data
         # When parsing the SUPPLY matrix we are instantiating OUTPUTS of activities
@@ -339,18 +337,19 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
             sup_ac_key = (row[4], row[7])
             if sup_ac_key in sup_activity_instances_map:
                 sacNode = sup_activity_instances_map[sup_ac_key]
-            else :
+            else:
                 # Supply activity node
-                sacNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#sa_{}".format(code, len(sup_activity_instances_map)))
+                sacNode = URIRef(
+                    "http://rdf.bonsai.uno/data/exiobase3_3_17/{}#sa_{}".format(code, len(sup_activity_instances_map)))
                 sup_activity_instances_map[sup_ac_key] = sacNode
 
                 # insert ACTIVITY_URI is a activty
-                g.add((sacNode, RDF.type, BONT.Activity ))
+                g.add((sacNode, RDF.type, BONT.Activity))
 
                 # TODO: check that activity type exists in the vocabulary
                 # ACTIVITY_TYPE_URI = the act type is a SUPPLY of specific product row[7]
                 # ACTIVITY_URI b:activityType ACTIVITY_TYPE_URI
-                g.add((sacNode, BONT.hasActivityType, sat_map[row[7]] ))
+                g.add((sacNode, BONT.hasActivityType, sat_map[row[7]]))
 
                 # Add provenance namedGraph member relation
                 g.add((DATASET, PROV.hadMember, sacNode))
@@ -358,16 +357,13 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
                 # LOCATION_URI = get Location URI from row[4] country of provenance
                 # --> we do not have AGENT_URI = get Agent URI from LOCATION_URI
                 # ACTIVITY_URI b:hasLocation LOCATION_URI
-                g.add((sacNode, BONT.hasLocation, country_map[row[4]] ))
+                g.add((sacNode, BONT.hasLocation, country_map[row[4]]))
 
-                #ACTIVITY_URI b:hasTemporalExtent 2011_EXTENT_URI
-                g.add((sacNode, BONT.hasTemporalExtent, extent2011node ))
+                # ACTIVITY_URI b:hasTemporalExtent 2011_EXTENT_URI
+                g.add((sacNode, BONT.hasTemporalExtent, extent2011node))
 
             # This flow object is output of a generic supply activty
             g.add((flowNode, BONT.isOutputOf, sacNode))
-
-
-
         else:
             # Data from HSUP
             # FLOW_URI  b:outputOf ACTIVITY_URI
@@ -375,22 +371,21 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
 
         if row[10]:
             # ACTIVITY_URI  b:determiningFlow FLOW_URI
-            g.add((acNode,  BONT.hasDeterminingFlow, flowNode))
+            g.add((acNode, BONT.hasDeterminingFlow, flowNode))
 
-        g.add((flowNode, OM2.hasNumericalValue, Literal(row[9], datatype=XSD.float) ))
-
+        g.add((flowNode, OM2.hasNumericalValue, Literal(row[9], datatype=XSD.float)))
 
         # om2:hasUnit om2:kilogram  row[8]
         if row[8] == 'kilogram':
-            g.add((flowNode,  OM2.hasUnit, OM2.kilogram))
-            g.add((balanceNode,  OM2.hasUnit, OM2.kilogram))
+            g.add((flowNode, OM2.hasUnit, OM2.kilogram))
+            g.add((balanceNode, OM2.hasUnit, OM2.kilogram))
         elif row[8] == 'tonne':
-            g.add((flowNode,  OM2.hasUnit, OM2.tonne))
-            g.add((balanceNode,  OM2.hasUnit, OM2.tonne))
-        else :
+            g.add((flowNode, OM2.hasUnit, OM2.tonne))
+            g.add((balanceNode, OM2.hasUnit, OM2.tonne))
+        else:
             # Uknown, let's hope for the best
-            g.add((flowNode,  OM2.hasUnit, OM2[row[8]]))
-            g.add((balanceNode,  OM2.hasUnit, OM2[row[8]]))
+            g.add((flowNode, OM2.hasUnit, OM2[row[8]]))
+            g.add((balanceNode, OM2.hasUnit, OM2[row[8]]))
 
         balance_types = {
             "tonnes": "DryMass",
@@ -403,7 +398,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
 
         # FLOW_URI bont:objectType _:uri41 .
         # FLOW_URI b:objectType get URI OF FLow Object (row[6]/row[7])
-        g.add((flowNode,  BONT.hasObjectType, fobj_map[row[7]]))
+        g.add((flowNode, BONT.hasObjectType, fobj_map[row[7]]))
 
         # If the flow is disaggregate, connect it to appropriate aggrigate flow
         if disaggregate:
@@ -425,7 +420,7 @@ def csv2rdf(args):
 
     print("Parsing file: {}".format(csvfile))
 
-    pandasDF=pd.read_csv(csvfile, header=None, float_precision="high")
+    pandasDF = pd.read_csv(csvfile, header=None, float_precision="high")
 
     # Create graph
     makeRDF(args, filename, pandasDF, args.code, isInput=(args.flowtype == 'input'))

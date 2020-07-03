@@ -9,14 +9,13 @@ Options:
 """
 
 import argparse
-from docopt import docopt
 from EXIOBASE_conversion_software import conversion
 import sys
 
 
 def main():
     parser = argparse.ArgumentParser(description='Convert EXIOBASE .csv file to RDF/TTL')
-    parser.add_argument('-i','--input',
+    parser.add_argument('-i', '--input',
                         dest='csvfile',
                         required=True,
                         help='<Required> path to csv file to convert')
@@ -32,12 +31,12 @@ def main():
                         help='The code of the specific file: HSUP/HUSE/HFD/Other?')
 
     parser.add_argument('--flowtype',
-                        choices=['input','output'],
+                        choices=['input', 'output'],
                         required=True,
                         help='If the flow are input or output of activites')
 
     parser.add_argument('--format',
-                        choices=['nt','ttl', 'xml'],
+                        choices=['nt', 'ttl', 'xml'],
                         default='nt',
                         help='The output format')
 
