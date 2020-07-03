@@ -253,6 +253,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
     fileCounter = 1
 
     for index, row in data.iterrows():
+        print(index)
         if args.multifile:
             if index%int(args.multifile) == 0 and index != 0:
                 print("Parsed {} flows / {} activities".format(index, len(activity_instances_map)))
@@ -265,7 +266,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
                 print("Parsed {} flows / {} activities".format(index, len(activity_instances_map)))
 
         # Is the data an aggregate or disaggregate flow
-        if row[7] in agg_obj_act_map and agg_obj_act_map[row[7]] == row[3]:
+        if row[7] in agg_obj_act_map:
             aggregate = True
         if row[7] in agg_map:
             disaggregate = True
@@ -413,6 +414,8 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
         disaggregate = False
 
     # Serialize the last of the triples
+    if not os.path.exists(args.outdir):
+        os.makedirs(args.outdir)
     serialize_graph(args, filename, g, fileCounter)
 
 
@@ -423,7 +426,6 @@ def csv2rdf(args):
     print("Parsing file: {}".format(csvfile))
 
     pandasDF=pd.read_csv(csvfile, header=None, float_precision="high")
-    print(pandasDF.head())
 
     # Create graph
     makeRDF(args, filename, pandasDF, args.code, isInput=(args.flowtype == 'input'))

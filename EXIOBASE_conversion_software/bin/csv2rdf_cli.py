@@ -23,7 +23,7 @@ def main():
 
     parser.add_argument('-o', '--outdir',
                         dest='outdir',
-                        default='./',
+                        default='output/',
                         help='Output directory')
 
     parser.add_argument('-c', '--code',
