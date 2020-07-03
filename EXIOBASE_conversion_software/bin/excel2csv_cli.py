@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """EXIOBASE-conversion-software excel2csv CLI.
 Usage:
-  excel2csv-cli -i <input/dirpath> -o <output/dirpath> -c <HSUP/HUSE>
+  excel2csv-cli -i <input/dirpath> -o <output/dirpath>
 Options:
   -h --help     Show this screen.
   --version     Show version.
@@ -24,11 +24,6 @@ def main():
                         dest='outdir',
                         default='./',
                         help='Output directory')
-
-    parser.add_argument('-c', '--code',
-                        dest='code',
-                        required=True,
-                        help='The code of the specific file: HSUP/HUSE/HFD/Other?')
 
     args = parser.parse_args()
 

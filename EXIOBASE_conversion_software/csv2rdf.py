@@ -24,11 +24,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import sys
+import os
+import time
 import ntpath
 import datetime
-from io import StringIO
-import argparse
 from . import __version_dot__, __version_dash__
 
 import numpy as np
@@ -36,10 +35,10 @@ import pandas as pd
 
 from os import listdir
 from os.path import isfile, join
-import time
+import pkg_resources
 
-from rdflib import Graph, Literal, BNode, Namespace, URIRef
-from rdflib.namespace import DCTERMS, FOAF, XSD, OWL, RDFS, RDF, SKOS
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import FOAF, XSD, OWL, RDFS, RDF, SKOS
 
 
 def merge_files(args, filename):
@@ -67,6 +66,14 @@ def merge_files(args, filename):
 def file_name(path):
     head, tail = ntpath.split(path)
     return tail or ntpath.basename(head)
+
+
+def load_dataset(file_handler, sheetname):
+    return pd.read_excel(
+        file_handler,
+        sheet_name=sheetname,
+        header=0,
+    )
 
 
 def serialize_graph(args, filename, graph, index=None):
@@ -191,6 +198,13 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
     #act_numcodes = data.iloc[:,2].unique() # E.g., i01.a
     act_alphacodes = data.iloc[:,3].unique() # E.g., A_PARI
 
+    agg_obj_act_map = {'C_CLPT': 'A_COAL',
+                       'C_GASS': 'A_GASE',
+                       'C_COPR': 'A_COKE',
+                       'C_REFP': 'A_REFN',
+                       'C_CHBI': 'A_CHEM',
+                       'C_BGAS': 'A_MGWG'}
+
     print("Working on: {} countries, {} activities, {} products".format(len(all_countries),
                                                                     len(fobj_alphacodes),
                                                                     len(act_alphacodes)
@@ -213,15 +227,23 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
             fo_node = URIRef("{}S_{}".format(BRDFFO,fo))
             sat_map[fo] = fo_node
 
-
     fat_map = {}
     for fa in act_alphacodes:
         fa_node = URIRef("{}{}".format(BRDFFAT,fa))
         fat_map[fa] = fa_node
 
+    # Load Exiobase Classifications
+    file_path = os.path.join("data", "exiobase_classifications_v_3_3_17.xlsx")
+    file_handler = pkg_resources.resource_stream(__name__, file_path)
+    obj_agg = load_dataset(file_handler, "Product_activity_correspondence")
+    agg_products = ['C_CLPT', 'C_GASS', 'C_COPR', 'C_REFP', 'C_CHBI', 'C_BGAS']
+    agg_map = {product: agg_product for product, agg_product in
+                    zip(obj_agg["product_code"], obj_agg['agg_product_code']) if agg_product in agg_products}
 
     activity_instances_map = {}
     sup_activity_instances_map = {}
+    agg_flows_map = dict()
+    aggregate = disaggregate = False
 
     ## Here is the instantiation of the actual data, the FLOWs
     ## Create new graph
@@ -242,12 +264,21 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
             if index%1000 == 1:
                 print("Parsed {} flows / {} activities".format(index, len(activity_instances_map)))
 
-        # TODO: Here for each row we need to instantiate:
+        # Is the data an aggregate or disaggregate flow
+        if row[7] in agg_obj_act_map and agg_obj_act_map[row[7]] == row[3]:
+            aggregate = True
+        if row[7] in agg_map:
+            disaggregate = True
 
         # FLOW_URI = generate Flow URI For this row
-        flowNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#F_{}".format(code,index))
+        flowNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#F_{}".format(code, index))
+
+        # If the flow is aggregate, we save it for disaggregate flows to connect to
+        if aggregate:
+            agg_flows_map[f'{row[4]}-{row[7]}'] = flowNode
+
         # insert flow_uri is A Flow
-        g.add((flowNode, RDF.type, BONT.Flow ))
+        g.add((flowNode, RDF.type, BONT.Flow))
         # Add provenance namedGraph member relation
         g.add((DATASET, PROV.hadMember, flowNode))
 
@@ -372,6 +403,14 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
         # FLOW_URI bont:objectType _:uri41 .
         # FLOW_URI b:objectType get URI OF FLow Object (row[6]/row[7])
         g.add((flowNode,  BONT.hasObjectType, fobj_map[row[7]]))
+
+        # If the flow is disaggregate, connect it to appropriate aggrigate flow
+        if disaggregate:
+            parent_node = agg_flows_map[f'{row[4]}-{agg_map[row[7]]}']
+            g.add((flowNode, DC.isPartOf, parent_node))
+
+        aggregate = False
+        disaggregate = False
 
     # Serialize the last of the triples
     serialize_graph(args, filename, g, fileCounter)
