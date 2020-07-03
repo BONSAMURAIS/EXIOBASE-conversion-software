@@ -9,6 +9,7 @@ Options:
 """
 
 import argparse
+from docopt import docopt
 from EXIOBASE_conversion_software import conversion
 import sys
 
@@ -46,7 +47,7 @@ def main():
                         help='Create multiple files each with x triples. Restricted to nt format.')
 
     parser.add_argument('--merge',
-                        default=True,
+                        default=False,
                         dest="merge",
                         help='If multifile is chosen, merge all nt files')
 

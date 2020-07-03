@@ -1,7 +1,3 @@
-from .csv2rdf import csv2rdf
-from .excel2csv import excel2csv
-from .makeRDF import makeRDF
-
 __all__ = (
     "csv2rdf",
     "excel2csv",
@@ -13,6 +9,10 @@ __version_dot__ = ".".join(str(v) for v in VERSION)
 __version_dash__ = "_".join(str(v) for v in VERSION)
 
 data_dir = "../data"
+
+from .csv2rdf import csv2rdf
+from .excel2csv import excel2csv
+from .makeRDF import makeRDF
 
 
 def conversion(args, script):

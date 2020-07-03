@@ -9,6 +9,7 @@ Options:
 """
 
 import argparse
+from docopt import docopt
 from EXIOBASE_conversion_software import conversion
 import sys
 

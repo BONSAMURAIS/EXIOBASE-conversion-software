@@ -253,7 +253,6 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
     fileCounter = 1
 
     for index, row in data.iterrows():
-        print(index)
         if args.multifile:
             if index % int(args.multifile) == 0 and index != 0:
                 print("Parsed {} flows / {} activities".format(index, len(activity_instances_map)))
@@ -379,7 +378,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
         if row[8] == 'kilogram':
             g.add((flowNode, OM2.hasUnit, OM2.kilogram))
             g.add((balanceNode, OM2.hasUnit, OM2.kilogram))
-        elif row[8] == 'tonne':
+        elif row[8] in ['tonne', 'tonnes']:
             g.add((flowNode, OM2.hasUnit, OM2.tonne))
             g.add((balanceNode, OM2.hasUnit, OM2.tonne))
         else:
