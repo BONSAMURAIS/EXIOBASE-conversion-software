@@ -22,69 +22,124 @@
 # import logging as log
 
 import re
-import csv
-import sys
-import argparse
-
+import os
 import ntpath
 import pandas as pd
 import numpy as np
+import pkg_resources
+from collections import namedtuple
 
-from pyxlsb import open_workbook as open_xlsb
+ObjectAggregation = namedtuple('ObejectAggretation', ['product_name', 'agg_product_name', 'product_code',
+                                                      'agg_product_code', 'activity', 'activity_code'])
+
 
 def file_name(path):
     head, tail = ntpath.split(path)
     return tail or ntpath.basename(head)
 
 
-def xlsb2csv(xlsb, outdir, sheetnum = 2, csvOut=None):
+def load_dataset(file_handler, sheetname):
+    return pd.read_excel(
+        file_handler,
+        sheet_name=sheetname,
+        header=0,
+    )
+
+
+def xlsb2csv(xlsb, outdir, sheetnum=1, csvOut=None):
     '''
     convert a XLSB to a long table and write that table to a CSV file as well.
     The table is ready to be used for conversion to RDF.
     TODO: maybe add some caching to avoid reading the Excel file again.
     '''
-    csvArr = []
 
     if csvOut is None:
         filename = re.sub(r'.xls.{0,1}$', '', file_name(xlsb))
         csvOut = outdir + filename + '.csv'
-    else :
+    else:
         csvOut = outdir + csvOut
 
-    with open_xlsb(xlsb) as wb:
-        # Read the sheet to array first and convert to pandas first for quick access
-        with wb.get_sheet(sheetnum) as sheet:
-            for row in sheet.rows(sparse = True):
-                vals = [item.v for item in row]
-                csvArr.append(vals)
+    # Load Exiobase Classifications
+    file_path = os.path.join("data", "exiobase_classifications_v_3_3_17.xlsx")
+    file_handler = pkg_resources.resource_stream(__name__, file_path)
+    obj_agg = load_dataset(file_handler, "Product_activity_correspondence")
+    determining_flows = {product: activity for product, activity in
+                         zip(obj_agg['agg_product_code'], obj_agg['activity_code'])}
 
-    csvDF = pd.DataFrame(csvArr)
-    # Start or and colum take into account headers
+    # Create dictionary of aggregate product codes,
+    # along with the disaggregation
+    object_aggregates = dict()
+    agg_products = ['C_CLPT', 'C_GASS', 'C_COPR', 'C_REFP', 'C_CHBI', 'C_BGAS']
+    for index, row in obj_agg.iterrows():
+        if row['agg_product_code'] in agg_products:
+            if row['agg_product_code'] in object_aggregates:
+                object_aggregates[row['agg_product_code']].append(ObjectAggregation(row['product_name'],
+                                                                                    row['agg_product_name'],
+                                                                                    row['product_code'],
+                                                                                    row['agg_product_code'],
+                                                                                    row['activity'],
+                                                                                    row['activity_code']))
+            else:
+                object_aggregates[row['agg_product_code']] = [ObjectAggregation(row['product_name'],
+                                                                                row['agg_product_name'],
+                                                                                row['product_code'],
+                                                                                row['agg_product_code'],
+                                                                                row['activity'],
+                                                                                row['activity_code'])]
+
+    csvDF = pd.read_excel(xlsb, sheet_name=sheetnum, engine='pyxlsb', header=None)
+
+    # Rename header
+    names = {0: 'country', 1: 'product_name', 2: 'product_code_1', 3: 'product_code_2', 4: 'unit'}
+    csvDF.rename(columns=names, inplace=True)
+
+    # Copy disaggregate product rows
+    csvAggreg = pd.DataFrame(columns=csvDF.columns)
+    for key in object_aggregates.keys():
+        disag_prods = csvDF.loc[csvDF['product_code_2'].isin([tup.product_code for tup in object_aggregates[key]])].copy(deep=True)
+
+        aggregate = disag_prods.groupby([disag_prods.country, disag_prods.unit], as_index=False).sum()
+        aggregate['product_name'] = object_aggregates[key][0].agg_product_name
+        aggregate['product_code_2'] = object_aggregates[key][0].agg_product_code
+        if aggregate.shape[0] > 0:
+            csvAggreg = pd.concat([csvAggreg, aggregate])
+
+    # Add aggregate rows to top of csvDF
+    csvDF = pd.concat([csvDF.iloc[:4], csvAggreg, csvDF.iloc[4:]]).reset_index(drop=True)
+
+    # Start row and column take into account headers
     startRow = 4
     startCol = 5
     print("Parsed sheet has size {}".format(csvDF.shape))
 
-    ## Separates Header information from actual data
-    actTrans = csvDF.iloc[:4,].transpose() # Get the subset for activities
+    # Separates Header information from actual data
+    actTrans = csvDF.iloc[:4, ].transpose()  # Get the subset for activities
     outDF = []
     rows = csvDF.shape[0]
     cols = csvDF.shape[1]
     for i in range(startRow, rows):
-        if (i-startRow)%50 ==1:
+        if (i - startRow) % 50 == 1:
             print("Parsed {}".format(i-startRow-1))
         for j in range(startCol, cols):
             # read values
-            if csvDF.iat[i,j] != 0: # Commented out to filter in the end with pandas
-                mainFlow = False  # TODO: (j == (i + 1))  # Determining flow currently not working
+            if csvDF.iat[i, j] != 0:  # Comment out to filter in 0 value flows
                 colAnnot = actTrans.iloc[j]
-                rowAnnot = csvDF.iloc[i,0:5]
-                outRow = np.concatenate((colAnnot, rowAnnot, [csvDF.iloc[i,j]], [mainFlow]),0)
+                row_annot = csvDF.iloc[i, 0:5]
+                # Based on exiobase classifications, determine whether a flow is determining
+                if csvDF.iloc[i, 3] in determining_flows and determining_flows[csvDF.iloc[i, 3]] == colAnnot[3]:
+                    determining = True
+                else:
+                    determining = False
+                outRow = np.concatenate((colAnnot, row_annot, [csvDF.iloc[i, j]], [determining]), 0)
                 outDF.append(outRow)
     outDF = pd.DataFrame(outDF)
-    # outDF = outDF.loc[outDF.iloc[:,5] != 0,:]
+
     print("Saving to {}".format(csvOut))
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
     outDF.to_csv(csvOut, header=False, index=False)
     return outDF
+
 
 def excel2csv(args):
 
@@ -98,7 +153,6 @@ def excel2csv(args):
     # -> year + timestamp of production + version number
     # This metada is not parsed currently
 
-
     # File HSUP & HUSE both parse sheet number 2
 
     # File HSUT_extension contains both outputs and input flows
@@ -107,6 +161,5 @@ def excel2csv(args):
 
     # HFD  sheet FD (2) for Final demand and sheet stock_to_waste (3) for Stock to waste
     # This one is missing the activity types 6+1
-
 
     xlsb2csv(exfile, outdir)

@@ -26,28 +26,31 @@
 
 import sys
 from pathlib import Path
-from rdflib import Graph, Literal, BNode, Namespace, RDF, URIRef
-from rdflib.namespace import DC, FOAF, XSD, OWL, RDFS
+from rdflib import Graph, Literal, Namespace, RDF, URIRef
+from rdflib.namespace import XSD, OWL, RDFS
 import numpy as np
 from .excel2csv import xlsb2csv
 import pandas as pd
-def getAndSetNode(nID, ojDict, ojType="L"):
-        '''
-        Utility function to get and set a node to a dictionary ojDict
-        type: "L" for Literal, "U" for URIRef, and "B" for BNode
-        But it is unlikely that we would create BNode this way.
-        '''
-        funcMap ={"L": "Literal", "U": "URIRef", "B":"BNode"}
-        if ojType not in funcMap:
-            return "Unknown ojbect type: {}".format(ojType)
-        if ojType == "B":
-            return "Unknow behavior for BNode!"
 
-        node = ojDict.get(nID)
-        if node is None:
-            node = locals()[funcMap[ojType]](nID) # some magic here
-            ojDict[nID] = node # ojDict gets update and carried outside!
-        return node
+
+def getAndSetNode(nID, ojDict, ojType="L"):
+    """
+    Utility function to get and set a node to a dictionary ojDict
+    type: "L" for Literal, "U" for URIRef, and "B" for BNode
+    But it is unlikely that we would create BNode this way.
+    """
+    funcMap = {"L": "Literal", "U": "URIRef", "B": "BNode"}
+    if ojType not in funcMap:
+        return "Unknown ojbect type: {}".format(ojType)
+    if ojType == "B":
+        return "Unknow behavior for BNode!"
+
+    node = ojDict.get(nID)
+    if node is None:
+        node = locals()[funcMap[ojType]](nID)  # some magic here
+        ojDict[nID] = node  # ojDict gets update and carried outside!
+    return node
+
 
 def makeRDF(inputDF):
     '''
@@ -63,7 +66,7 @@ def makeRDF(inputDF):
     PROV = Namespace("http://www.w3.org/ns/prov#")
     OM = Namespace("http://www.ontology-of-units-of-measure.org/resource/om-2/")
 
-    # Initialize graph and namespaces 
+    # Initialize graph and namespaces
     g = Graph()
     # g = Graph(identifier="TestGraph")
 
@@ -78,17 +81,17 @@ def makeRDF(inputDF):
     # g.parse('./datasetmeta.ttl', format = 'n3')
 
     # meta data
-    DATASET=URIRef(LOCAL + "EXIOBASE3.3.15HSUT2011") # dataset name
-    DATAFILE=URIRef(LOCAL + "MR_HSUP_2011_v3_3_15.xlsb")
-    g.add( (
+    DATASET = URIRef(LOCAL + "EXIOBASE3.3.15HSUT2011")  # dataset name
+    DATAFILE = URIRef(LOCAL + "MR_HSUP_2011_v3_3_15.xlsb")
+    g.add((
         DATASET,
-        RDF.type, 
+        RDF.type,
         DCAT.Dataset
     )
     )
 
-    g.add( (
-        DATASET, 
+    g.add((
+        DATASET,
         DCAT.landingPage,
         URIRef("https://www.exiobase.eu/index.php/data-download/exiobase3hyb")
     )
@@ -105,7 +108,6 @@ def makeRDF(inputDF):
         Literal("EXIOBASE 3.3.15 - HSUT - 2011")
     ))
 
-
     g.add((
         DATASET,
         RDFS.comment,
@@ -113,12 +115,12 @@ def makeRDF(inputDF):
     ))
     g.add((
         DATASET,
-        PROV.startedAtTime, 
+        PROV.startedAtTime,
         Literal("2018-09-20T00:00:00", datatype=XSD.dateTime)
     ))
     g.add((
         DATASET,
-        PROV.endedAtTime, 
+        PROV.endedAtTime,
         Literal("2018-09-20T24:00:00", datatype=XSD.dateTime)
     ))
 
@@ -143,70 +145,58 @@ def makeRDF(inputDF):
     # Relationship type
     activity = (DEF.activity, RDF.type, PROV.activity)
     activityCode1 = (DEF.activityCode1, RDF.type,
-                Literal("Some description for Activity Code 1" ))
+                     Literal("Some description for Activity Code 1"))
     activityCode2 = (DEF.activityCode2, RDF.type,
-                Literal("Some description for Activity Code 2" ))
+                     Literal("Some description for Activity Code 2"))
     activityName = (DEF.activityName, RDF.type, DCT.title)
     countryCode = (DEF.countryCode, RDF.type,
-                Literal("ISO3166 Alpha 2 Country Code"))
+                   Literal("ISO3166 Alpha 2 Country Code"))
     hasActivity = (DEF.hasActivity, RDF.type, PROV.wasAssociatedWith)
     hasAmount = (DEF.hasAmount, RDF.type, PROV.generated)
     isMainProduct = (DEF.isMainProduct, RDF.type,
-                PROV.wasAssociatedWith)
+                     PROV.wasAssociatedWith)
     hasProduct = (DEF.hasProduct, RDF.type, PROV.generated)
     product = (DEF.product, RDF.type, PROV.entity)
-    productCode1 = (DEF.productCode1, RDF.type, Literal("Some description for Product Code 1" ))
-    productCode2 = (DEF.productCode2, RDF.type, Literal("Some description for Product Code 2" ))
+    productCode1 = (DEF.productCode1, RDF.type, Literal("Some description for Product Code 1"))
+    productCode2 = (DEF.productCode2, RDF.type, Literal("Some description for Product Code 2"))
     productName = (DEF.productName, RDF.type, DCT.title)
 
-
     objectList = [
-                activity,
-                activityCode1,
-                activityCode2,
-                activityName,
-                countryCode,
-                hasActivity, 
-                isMainProduct,
-                hasProduct,
-                hasAmount,
-                product,
-                productCode1,
-                productCode2,
-                productName]
+        activity,
+        activityCode1,
+        activityCode2,
+        activityName,
+        countryCode,
+        hasActivity,
+        isMainProduct,
+        hasProduct,
+        hasAmount,
+        product,
+        productCode1,
+        productCode2,
+        productName]
 
     for triple in objectList:
         g.add(triple)
 
-
     # Now ready to loop and add
     # Processing country list
 
-    actCountries = inputDF.iloc[:,0].unique()
-    prodCountries = inputDF.iloc[:,4].unique()
-    COUNTRIES = np.unique(np.concatenate((actCountries, prodCountries),0))
-    productCodes1 = inputDF.iloc[:,6].unique()
-    productCodes2 = inputDF.iloc[:,7].unique()
-    activityCodes1 = inputDF.iloc[:,2].unique()
-    activityCodes2 = inputDF.iloc[:,3].unique()
+    actCountries = inputDF.iloc[:, 0].unique()
+    prodCountries = inputDF.iloc[:, 4].unique()
+    COUNTRIES = np.unique(np.concatenate((actCountries, prodCountries), 0))
+    productCodes1 = inputDF.iloc[:, 6].unique()
+    activityCodes1 = inputDF.iloc[:, 2].unique()
 
-    print("Working on:{} countries, {} activities, {} products".format(len(COUNTRIES), 
-                                                                    len(activityCodes1),
-                                                                    len(productCodes1)
-                                                                    ))
+    print("Working on:{} countries, {} activities, {} products".format(len(COUNTRIES),
+                                                                       len(activityCodes1),
+                                                                       len(productCodes1)
+                                                                       ))
     trackCountry = {}
     for c in COUNTRIES:
-        country = URIRef(BASE+"country#" + c)
+        country = URIRef(BASE + "country#" + c)
         trackCountry[c] = country
         g.add((country, DEF.countryCode, Literal(c, datatype=XSD.string)))
-
-
-    trackProduct = {}
-    trackActivity = {}
-    trackProductCode1 = {}
-    trackProductCode2 = {}
-    trackActivityCode1 = {}
-    trackActivityCode2 = {}
 
     for index, row in inputDF.iterrows():
 
@@ -225,43 +215,43 @@ def makeRDF(inputDF):
         # thisActivity = getAndSetNode(BASE + "activity/" + row[2], trackActivity, "U")
         thisActivity = URIRef(BASE + "activity#" + row[2])
 
-        g.add( (thisActivity, RDF.type, DEF.activity) )
-        g.add( (thisActivity, DEF.activityCode1, activityCode1) )
-        g.add( (thisActivity, DEF.activityCode2, activityCode2) )
-        g.add( (thisActivity, DEF.country, acountry) )
-        g.add( (thisActivity, DEF.activityName, Literal(row[1])) )
-        g.add( (thisActivity, DEF.hasProduct, thisProduct) )
+        g.add((thisActivity, RDF.type, DEF.activity))
+        g.add((thisActivity, DEF.activityCode1, activityCode1))
+        g.add((thisActivity, DEF.activityCode2, activityCode2))
+        g.add((thisActivity, DEF.country, acountry))
+        g.add((thisActivity, DEF.activityName, Literal(row[1])))
+        g.add((thisActivity, DEF.hasProduct, thisProduct))
         if (row[10]):
-            g.add( (thisProduct, DEF.isMainProduct, thisActivity))
+            g.add((thisProduct, DEF.isMainProduct, thisActivity))
         g.add((DATASET, DEF.hasActivity, thisActivity))
         pcountry = getAndSetNode(row[4], trackCountry, "L")
 
-        g.add( (thisProduct, RDF.type, DEF.product) )
-        g.add( (thisProduct, DEF.productCode1, productCode1) )
-        g.add( (thisProduct, DEF.productCode2, productCode2) )
-        g.add( (thisProduct, DEF.country, pcountry ) )
-        g.add( (thisProduct, DEF.productName, Literal(row[5])) )
+        g.add((thisProduct, RDF.type, DEF.product))
+        g.add((thisProduct, DEF.productCode1, productCode1))
+        g.add((thisProduct, DEF.productCode2, productCode2))
+        g.add((thisProduct, DEF.country, pcountry))
+        g.add((thisProduct, DEF.productName, Literal(row[5])))
 
-
-        thisAmount = URIRef(BASE + "measure#" + row[4] +"_"+ row[3] + row[6] )
-        g.add( (thisAmount, RDF.type, OM.measure) )
+        thisAmount = URIRef(BASE + "measure#" + row[4] + "_" + row[3] + row[6])
+        g.add((thisAmount, RDF.type, OM.measure))
         # g.add( (thisAmount, DEF.countryCode, pcountry ) )
         # g.add( (thisAmount, DEF.productCode1, productCode1 ) )
-        g.add( (thisAmount, OM.quantity, Literal(row[9], datatype=XSD.float) ) )
-        g.add( (thisAmount, OM.hasUnit, URIRef(OM + row[8])) )  
-        g.add( (thisAmount, DCT.title, productCode2))
+        g.add((thisAmount, OM.quantity, Literal(row[9], datatype=XSD.float)))
+        g.add((thisAmount, OM.hasUnit, URIRef(OM + row[8])))
+        g.add((thisAmount, DCT.title, productCode2))
         # asociate product to measure
-        g.add(  (thisProduct, DEF.hasAmount, thisAmount))
+        g.add((thisProduct, DEF.hasAmount, thisAmount))
     return g
-def makeRdf():
 
+
+def makeRdf():
     exfile = sys.argv[1]
     filename = Path(exfile).stem
-    outCSV= "long_" + filename + ".csv"
+    outCSV = "long_" + filename + ".csv"
     if Path(outCSV).is_file():
-        pandasDF=pd.read_csv(outCSV, header=None)
+        pandasDF = pd.read_csv(outCSV, header=None)
     else:
-        pandasDF = xlsb2csv(exfile, sheetnum=2) # This will also write a CSV output with name 'long_*.csv'
+        pandasDF = xlsb2csv(exfile, sheetnum=2)  # This will also write a CSV output with name 'long_*.csv'
     rdfGraph = makeRDF(pandasDF)
     print("Done making RDF graph")
     rdfGraph.serialize(destination=(filename + '.rdf'), format='xml')

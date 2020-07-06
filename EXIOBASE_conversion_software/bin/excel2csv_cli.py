@@ -16,7 +16,7 @@ import sys
 
 def main():
     parser = argparse.ArgumentParser(description='Convert EXIOBASE .xslb file to csv')
-    parser.add_argument('-i','--import',
+    parser.add_argument('-i', '--import',
                         dest='exfile',
                         help='<Required> path to file to convert')
 

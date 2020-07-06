@@ -1,6 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
+
 def package_files(directory):
     paths = []
     for (path, directories, filenames) in os.walk(directory):
@@ -16,8 +17,8 @@ setup(
     author="BONSAI team",
     author_email="info@bonsai.uno",
     license=open('LICENSE').read(),
-    # package_data={'EXIOBASE_conversion_software': package_files(os.path.join('EXIOBASE_conversion_software', 'data'))},
-    entry_points = {
+    package_data={'EXIOBASE_conversion_software': package_files(os.path.join('EXIOBASE_conversion_software', 'data'))},
+    entry_points={
         'console_scripts': [
             'csv2rdf-cli = EXIOBASE_conversion_software.bin.csv2rdf_cli:main',
             'excel2csv-cli = EXIOBASE_conversion_software.bin.excel2csv_cli:main',
