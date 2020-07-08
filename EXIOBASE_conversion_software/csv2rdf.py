@@ -98,7 +98,7 @@ def setup_namespaces(code):
     BRDFLO = Namespace("http://rdf.bonsai.uno/location/exiobase3_3_17#")
     BRDFTIME = Namespace("http://rdf.bonsai.uno/time#")
     BRDFFAT = Namespace("http://rdf.bonsai.uno/activitytype/exiobase3_3_17#")
-    BRDFFOAF = Namespace("http://rdf.bonsai.uno/foaf/exiobase3_3_17#")
+    BRDFFOAF = Namespace("http://rdf.bonsai.uno/foaf/bonsai#")
     BRDFDAT = Namespace("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#".format(code.lower()))
     BRDFPROV = Namespace("http://rdf.bonsai.uno/prov/exiobase3_3_17#")
     CC = Namespace('http://creativecommons.org/ns#')
