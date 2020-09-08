@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2018  Vang Quy Le
+# Copyright (C) 2020  Emil Riis Hansen
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -15,9 +15,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# Author: Vang Le-Quy (vle@its.aau.dk)
+# Author: Emil Riis Hansen (emilrh@cs.aau.dk)
 # Date: 20181205
-# Description: To convert to CSV file for Bo Weidema (bweidema@plan.aau.dk)
+# Description: To convert excel to CSV file 
 
 # import logging as log
 
