@@ -5,10 +5,9 @@
 # This is a specific solution. Other uses need to adapt accordingly
 #
 # Last modified Time-stamp: <2018-12-14 10:43:21 CET (vle)>
-# Author: Vang Le<vle@its.aau.dk>
-# Created: 2018-12-13T21:34:06+0100
+# Authors: Emil Riis Hansen <emilrh@cs.aau.dk>, Matteo Lissandrini <matteo@cs.aau.dk>
 
-# Copyright (C) 2018  Vang Quy Le
+# Copyright (C) 2020  Emil Riis Hansen, Matteo Lissandrini 
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
