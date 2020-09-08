@@ -1,7 +1,7 @@
 # About this repository
-The code in this repository is for conversion of these tables into into the Bonsai RDF ontology.
+The code in this repository supports the conversion of these tables into into the Bonsai RDF ontology.
 
-This readme explains the reasoning behind the choice to use the hybrid (rather than monetary) tables of EXIOBASE for the hackathon prototype.
+This readme also explains the reasoning behind the choice to use the hybrid (rather than monetary) tables of EXIOBASE for the prototype.
 
 ## Run it
 
@@ -65,22 +65,28 @@ docker run --rm  -v "$PWD/data":/data bonsai/converter python3 scripts/csv2rdf.p
 ```
 -->
 
+## Contributing
+All contributions to the scripts should be via pull request. 
+Please do not edit this package directly!
+
+# Choice to use the hybrid tables of EXIOBASE
 
 ## Versions of Exiobase currently available
-On [exiobase.eu](https://www.exiobase.eu/index.php/component/users/?view=login&return=aHR0cHM6Ly93d3cuZXhpb2Jhc2UuZXUvaW5kZXgucGhwL2RhdGEtZG93bmxvYWQvZXhpb2Jhc2UzaHliLzEyNS1leGlvYmFzZS0zLTMtMTctaHN1dC0yMDExL2ZpbGU=&Itemid=251) there are monetary and hybrid tables.
+There are monetary and hybrid tables published on [exiobase.eu](https://www.exiobase.eu/index.php/component/users/?view=login&return=aHR0cHM6Ly93d3cuZXhpb2Jhc2UuZXUvaW5kZXgucGhwL2RhdGEtZG93bmxvYWQvZXhpb2Jhc2UzaHliLzEyNS1leGlvYmFzZS0zLTMtMTctaHN1dC0yMDExL2ZpbGU=&Itemid=251) .
 
 ### Monetary tables v3.4
 
-Currently only Monetary Input-Otput tables (MIOTs) are uploaded on the website. There are two types of tables:
+The Monetary Input-Otput tables (MIOTs) are calculated for the years 1995-2011. There are two types of tables:
 
 - Product by product (200x200) x 49 countries/ROW regions
 - Industry by industry (163*163 ) x 49 countries//ROW regions
 
-The tables are calculated for the years 1995-2011. The assumption used for the construction of the MIOTs is the industry technology assumption.
+The MIOTs were constructed using the industry technology assumption.
 
 ### Hybrid tables v3.3.17
 
-The hybrid dataset includes HybriSupply and Use tables (HSUTs) and Hybrid Input-Output tables (HIOTs). The latter is determined using the by-product technology assumption. The tables are just for the year 2011.
+The hybrid dataset includes Hybrid Supply and Use tables (HSUTs) and Hybrid Input-Output tables (HIOTs). The tables are just for the year 2011.
+The HIOT was constructed using the by-product technology assumption. 
 
 ## Differences between the two tables
 
@@ -92,8 +98,8 @@ The lack of value added in the hybrid table is a temporary issue
 
 ## Selected framework for Bonsai
 
-The hybrid supply and use tables are the natural choice for Bonsai for the following reasons:
+The hybrid supply and use tables were selected for the BONSAI prototype for the following reasons:
 
-- currently there are no monetary supply and use tables avalaible. The available MIOTs are the result of the adoption of specific constructs. The aim of Bonsai is to leave to the user the choice of the construct to transform supply and use tables into input-output tables.
-- hybrid tables can be easily linked to other existing LCA-datasets becuase the tangible flows are accounted either in tonne or TJ. Therefore there is no need to use prices that may be a further source of uncertainty.
+- The aim of Bonsai is to leave to the user the choice of algorithms to transform supply and use tables into input-output tables. Currently there are no monetary supply and use tables available. The available MIOTs are the result of the adoption of the specific industry technology assumption. 
+- Hybrid tables can be easily linked to other existing LCA-datasets becuase the tangible flows are accounted either in tonne or TJ. Therefore there is no need to use prices that may be a further source of uncertainty.
 
