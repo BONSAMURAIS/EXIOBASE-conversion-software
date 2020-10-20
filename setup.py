@@ -30,6 +30,7 @@ setup(
         'pyxlsb',
         'pandas',
         'rdflib',
+        'xlrd'
     ],
     url="https://github.com/BONSAMURAIS/EXIOBASE-conversion-software",
     long_description=open('README.md').read(),
