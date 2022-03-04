@@ -24,6 +24,14 @@ $ pipenv shell
 $ python setup.py install
 ```
 
+### Download hsup and huse tables
+* Go to the [exiobase](https://www.exiobase.eu/index.php/data-download/exiobase3hyb) homepage.  
+* You might need a free user to access the datasets.  
+* Locate the `Exiobase3-hybrid` datasts under the `Data Download` tab.  
+* Download the `EXIOBASE 3.3.17 hsut 2011` dataset  
+* Extract the zip file.  
+* Move the HSUP and HUSE files to the /data folder.
+
 
 ## Usage
 ### As a command line tool
