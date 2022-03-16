@@ -25,11 +25,9 @@ $ python setup.py install
 ```
 
 ### Download hsup and huse tables
-* Go to the [exiobase](https://www.exiobase.eu/index.php/data-download/exiobase3hyb) homepage.  
-* You might need a free user to access the datasets.  
-* Locate the `Exiobase3-hybrid` datasts under the `Data Download` tab.  
-* Download the `EXIOBASE 3.3.17 hsut 2011` dataset  
-* Extract the zip file.  
+The original data can be downloaded from the BONSAI harvard dataverse.
+* Go to the [harvard dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/XKZQUA) homepage.  
+* Download the `MR_HSUP_2011_v3_3_17.xlsb` and `MR_HUSE_2011_v3_3_17.xlsb` data files   
 * Move the HSUP and HUSE files to the /data folder.
 
 
