@@ -5,9 +5,11 @@
 # This is a specific solution. Other uses need to adapt accordingly
 #
 # Authors:  Emil Riis Hansen <emilrh@cs.aau.dk>, Matteo Lissandrini <matteo@cs.aau.dk>, Vang Le<vle@its.aau.dk>
-
+#
 # Copyright (C) 2020  Emil Riis Hansen, Matteo Lissandrini,  Vang Le 
-
+#
+#
+#
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or

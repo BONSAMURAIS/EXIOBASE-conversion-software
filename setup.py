@@ -12,7 +12,7 @@ def package_files(directory):
 
 setup(
     name='EXIOBASE_conversion_software',
-    version="0.5",
+    version="0.5.1",
     packages=find_packages(),
     author="BONSAI team",
     author_email="info@bonsai.uno",
@@ -30,6 +30,7 @@ setup(
         'pyxlsb',
         'pandas',
         'rdflib',
+        'xlrd'
     ],
     url="https://github.com/BONSAMURAIS/EXIOBASE-conversion-software",
     long_description=open('README.md').read(),
