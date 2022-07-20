@@ -4,10 +4,11 @@
 # Description: create an RDF file from a Pandas dataframe.
 # This is a specific solution. Other uses need to adapt accordingly
 #
-# Last modified Time-stamp: <2018-12-14 10:43:21 CET (vle)>
-# Authors: Emil Riis Hansen <emilrh@cs.aau.dk>; Matteo Lissandrini <matteo@cs.aau.dk>; Vang Le<vle@its.aau.dk>,
+# Authors:  Emil Riis Hansen <emilrh@cs.aau.dk>, Matteo Lissandrini <matteo@cs.aau.dk>, Vang Le<vle@its.aau.dk>
 #
-# Copyright (C) 2020  Emil Riis Hansen, Matteo Lissandrini, Vang Quy Le
+# Copyright (C) 2020  Emil Riis Hansen, Matteo Lissandrini,  Vang Le 
+#
+#
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
