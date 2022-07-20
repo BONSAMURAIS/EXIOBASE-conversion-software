@@ -5,10 +5,10 @@
 # This is a specific solution. Other uses need to adapt accordingly
 #
 # Last modified Time-stamp: <2018-12-14 10:43:21 CET (vle)>
-# Author: Vang Le<vle@its.aau.dk>
-# Created: 2018-12-13T21:34:06+0100
+# Author: Emil Riis Hansen <emilrh@cs.aau.dk>, Matteo Lissandrini <matteo@cs.aau.dk>
 
-# Copyright (C) 2018  Vang Quy Le
+
+# Copyright (C) 2020  Emil Riis Hansen, Matteo Lissandrini 
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ def setup_namespaces(code):
     BRDFTIME = Namespace("http://rdf.bonsai.uno/time#")
     BRDFFAT = Namespace("http://rdf.bonsai.uno/activitytype/exiobase3_3_17#")
     BRDFFOAF = Namespace("http://rdf.bonsai.uno/foaf/bonsai#")
-    BRDFDAT = Namespace("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#".format(code.lower()))
+    BRDFDAT = Namespace("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/".format(code.lower()))
     BRDFPROV = Namespace("http://rdf.bonsai.uno/prov/exiobase3_3_17#")
     CC = Namespace('http://creativecommons.org/ns#')
     DC = Namespace('http://purl.org/dc/elements/1.1/')
@@ -271,7 +271,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
             disaggregate = True
 
         # FLOW_URI = generate Flow URI For this row
-        flowNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#F_{}".format(code, index))
+        flowNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/F_{}".format(code, index))
 
         # If the flow is aggregate, we save it for disaggregate flows to connect to
         if aggregate:
@@ -283,7 +283,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
         g.add((DATASET, PROV.hadMember, flowNode))
 
         # Balanceable Property
-        balanceNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}#B_{}".format(code, index))
+        balanceNode = URIRef("http://rdf.bonsai.uno/data/exiobase3_3_17/{}/B_{}".format(code, index))
         g.add((balanceNode, RDF.type, BONT.BalanceableProperty))
         g.add((balanceNode, OM2.hasNumericalValue, Literal(row[9], datatype=XSD.float)))
 
@@ -300,7 +300,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
             acNode = activity_instances_map[ac_key]
         else:
             acNode = URIRef(
-                "http://rdf.bonsai.uno/data/exiobase3_3_17/{}#A_{}".format(code, len(activity_instances_map)))
+                "http://rdf.bonsai.uno/data/exiobase3_3_17/{}/A_{}".format(code, len(activity_instances_map)))
             activity_instances_map[ac_key] = acNode
 
             # insert ACTIVITY_URI is a activty
@@ -339,7 +339,7 @@ def makeRDF(args, filename, data, code="HSUP", isInput=True):
             else:
                 # Supply activity node
                 sacNode = URIRef(
-                    "http://rdf.bonsai.uno/data/exiobase3_3_17/{}#sa_{}".format(code, len(sup_activity_instances_map)))
+                    "http://rdf.bonsai.uno/data/exiobase3_3_17/{}/sa_{}".format(code, len(sup_activity_instances_map)))
                 sup_activity_instances_map[sup_ac_key] = sacNode
 
                 # insert ACTIVITY_URI is a activty

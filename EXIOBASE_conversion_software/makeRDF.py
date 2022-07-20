@@ -6,11 +6,9 @@
 #
 # Last modified Time-stamp: <2018-12-14 10:43:21 CET (vle)>
 # Authors: Emil Riis Hansen <emilrh@cs.aau.dk>; Matteo Lissandrini <matteo@cs.aau.dk>; Vang Le<vle@its.aau.dk>,
-
-
+#
 # Copyright (C) 2020  Emil Riis Hansen, Matteo Lissandrini, Vang Quy Le
-
-
+#
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
